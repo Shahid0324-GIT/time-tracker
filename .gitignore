@@ -1,8 +1,10 @@
 /temp.py
 /__pycache__
 /*/__pycache__
+/*/*/__pycache__
 
 /backend/.env.*
 /backend/.env
 /backend/venv/
-
+/backend/__pycache__
+/backend/*/__pycache__

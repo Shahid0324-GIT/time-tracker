@@ -1,8 +1,17 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 from db import create_db_and_tables
-from routers import auth_routes
+from routers import auth_routes, oauth
 from contextlib import asynccontextmanager
+from config import SECRET_KEY, FRONTEND_URL
+
+# Load environment variables
+
+
+
+if not SECRET_KEY:
+    raise ValueError("SECRET_KEY environment variable is required")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -28,30 +37,41 @@ app = FastAPI(
 )
 
 # ============================================
+# SESSION MIDDLEWARE (Must be added FIRST for OAuth)
+# ============================================
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=SECRET_KEY,
+    session_cookie="session",
+    max_age=3600,  # 1 hour
+    same_site="lax",
+    https_only=False,  # Set to True in production with HTTPS
+)
+
+# ============================================
 # CORS MIDDLEWARE
 # ============================================
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:3000",  
-        "http://127.0.0.1:3000",
+        FRONTEND_URL,
+        "http://localhost:3000",
+        "http://localhost:5173",  # Vite default
     ],
     allow_credentials=True,
-    allow_methods=["*"],  # Allow all HTTP methods (GET, POST, etc.)
-    allow_headers=["*"],  # Allow all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # ============================================
 # INCLUDE ROUTERS
 # ============================================
-
 app.include_router(auth_routes.router)
+app.include_router(oauth.router)
 
 # ============================================
 # ROOT ENDPOINTS
 # ============================================
-
 @app.get("/")
 def root():
     """Root endpoint - API info"""
