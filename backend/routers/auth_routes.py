@@ -23,7 +23,7 @@ def register_user(user_data: UserCreate, session:Session=Depends(get_session)):
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User already exisits with this email."
+            detail="User already exists with this email."
         )
         
     hashed_password = hash_password(user_data.password)
