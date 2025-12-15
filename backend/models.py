@@ -1,7 +1,7 @@
 from sqlmodel import SQLModel, Field
 from pydantic import BaseModel, EmailStr
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 
 # ============================================
@@ -27,8 +27,8 @@ class User(SQLModel, table=True):
     avatar_url: Optional[str] = None      # Profile picture URL
     
     # Timestamps
-    created_at: datetime = Field(default_factory=datetime.now(datetime.timezone.utc))
-    updated_at: datetime = Field(default_factory=datetime.now(datetime.timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 # ============================================

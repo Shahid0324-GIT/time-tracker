@@ -5,6 +5,9 @@ import os
 load_dotenv(".env.development")
 DATABASE_URL = os.getenv("DATABASE_URL")
 
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL environment variable is not set")
+
 # Debugging statements
 # print("Database url: ", DATABASE_URL)
 
