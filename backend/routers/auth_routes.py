@@ -39,7 +39,7 @@ def register_user(user_data: UserCreate, session:Session=Depends(get_session)):
     session.commit()
     session.refresh(new_user)
     
-    token = create_access_token(data={"sub": str(new_user.id)+new_user.first_name})
+    token = create_access_token(data={"sub": str(new_user.id)})
     
     return Token(access_token=token, token_type="bearer", user=UserResponse(
         id=new_user.id,
@@ -80,7 +80,7 @@ def login_user(login_data: UserLogin, session:Session=Depends(get_session)):
             detail="Incorrect email or password"
         )
     
-    token = create_access_token(data={"sub": str(user.id) + user.first_name})
+    token = create_access_token(data={"sub": str(user.id)})
     
     return Token(
         access_token=token,

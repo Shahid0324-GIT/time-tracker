@@ -6,6 +6,7 @@ python-jose[cryptography]
 passlib[bcrypt]
 python-multipart
 python-dotenv
+pydantic[email] 
 
 # OAuth support
 authlib
