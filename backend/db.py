@@ -1,13 +1,7 @@
 from sqlmodel import SQLModel, Session, create_engine
 from config import DATABASE_URL
 
-if not DATABASE_URL:
-    raise ValueError("DATABASE_URL environment variable is not set")
-
-# Debugging statements
-# print("Database url: ", DATABASE_URL)
-
-engine = create_engine(DATABASE_URL, echo=True, pool_pre_ping=True)
+engine = create_engine(DATABASE_URL, echo=True, pool_pre_ping=True) # type: ignore
 
 # Debugging statements
 # print("Engine created: ", engine)

@@ -8,50 +8,8 @@ from sqlmodel import Session, select
 from models import User
 from db import get_session
 import uuid
-
 # Config
 from config import *
-
-
-if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
-    print("Warning: GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET missing. Google OAuth will not work.")
-
-if not GITHUB_CLIENT_ID or not GITHUB_CLIENT_SECRET:
-    print("Warning: GITHUB_CLIENT_ID or GITHUB_CLIENT_SECRET missing. GitHub OAuth will not work.")
-
-# Registering Google OAuth client (only if creds present)
-if GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET:
-    oauth.register(
-        name='google',
-        client_id=GOOGLE_CLIENT_ID,
-        client_secret=GOOGLE_CLIENT_SECRET,
-        server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
-        client_kwargs={
-            'scope': 'openid email profile',
-            'prompt': 'select_account',
-        }
-    )
-
-# Register GitHub OAuth (only if creds present)
-if GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET:
-    oauth.register(
-        name='github',
-        client_id=GITHUB_CLIENT_ID,
-        client_secret=GITHUB_CLIENT_SECRET,
-        authorize_url='https://github.com/login/oauth/authorize',
-        authorize_params=None,
-        access_token_url='https://github.com/login/oauth/access_token',
-        access_token_params=None,
-        client_kwargs={'scope': 'user:email'},
-    )
-
-
-
-
-if not SECRET_KEY or SECRET_KEY is None:
-    raise ValueError("SECRET_KEY env is mission or not set.")
-
-SECRET_KEY = cast(str, SECRET_KEY)
 
 # Password hashing setup
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
