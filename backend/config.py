@@ -1,8 +1,16 @@
 from dotenv import load_dotenv
 import os
 
+# OAuth
+from authlib.integrations.starlette_client import OAuth
+from starlette.config import Config
+
 # Load env vars
 load_dotenv(".env")
+
+# OAuth config
+config = Config('.env')
+oauth = OAuth(config)
 
 # DB
 DATABASE_URL = os.getenv("DATABASE_URL")

@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, Request, HTTPException
 from fastapi.responses import RedirectResponse
 from sqlmodel import Session
 from db import get_session
-from auth import oauth, get_or_create_oauth_user, create_access_token
-from config import FRONTEND_URL
+from auth import get_or_create_oauth_user, create_access_token
+from config import FRONTEND_URL, oauth
 
 router = APIRouter(prefix="/auth", tags=["OAuth"])
 

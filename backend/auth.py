@@ -9,10 +9,6 @@ from models import User
 from db import get_session
 import uuid
 
-# OAuth
-from authlib.integrations.starlette_client import OAuth
-from starlette.config import Config
-
 # Config
 from config import *
 
@@ -22,10 +18,6 @@ if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
 
 if not GITHUB_CLIENT_ID or not GITHUB_CLIENT_SECRET:
     print("Warning: GITHUB_CLIENT_ID or GITHUB_CLIENT_SECRET missing. GitHub OAuth will not work.")
-
-# OAuth config
-config = Config('.env')
-oauth = OAuth(config)
 
 # Registering Google OAuth client (only if creds present)
 if GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET:
