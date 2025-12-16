@@ -4,10 +4,11 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+import uuid
+
 from sqlmodel import Session, select
 from models import User
 from db import get_session
-import uuid
 
 # Config
 from config import *
