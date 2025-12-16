@@ -56,7 +56,7 @@ def get_client(
     return client
     
     
-@router.put("/{client_id}", status_code=status.HTTP_202_ACCEPTED, response_model=ClientResponse)
+@router.patch("/{client_id}", status_code=status.HTTP_200_OK, response_model=ClientResponse)
 def update_client(
     client_id: UUID,
     client_updated_data: ClientUpdate,
