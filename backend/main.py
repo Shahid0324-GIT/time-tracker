@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
+
 from db import create_db_and_tables
-from routers import auth_routes, oauth
+from routers import auth_routes, oauth, clients
 from contextlib import asynccontextmanager
 from config import SECRET_KEY, FRONTEND_URL
 
@@ -66,8 +67,10 @@ app.add_middleware(
 # ============================================
 # INCLUDE ROUTERS
 # ============================================
+
 app.include_router(auth_routes.router)
 app.include_router(oauth.router)
+app.include_router(clients.router)
 
 # ============================================
 # ROOT ENDPOINTS
