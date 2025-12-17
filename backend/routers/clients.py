@@ -4,7 +4,8 @@ from sqlmodel import Session, select, desc
 from uuid import UUID
 
 from db import get_session
-from models import ClientCreate, ClientResponse, ClientUpdate, User, Client
+from models import User, Client
+from api_types import ClientCreate, ClientResponse, ClientUpdate
 from auth import get_current_user
 
 # router

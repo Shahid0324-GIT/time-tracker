@@ -5,10 +5,10 @@ from uuid import UUID
 
 from db import get_session
 from models import (
-    Project, ProjectCreate, ProjectUpdate, ProjectResponse, 
-    ProjectWithClient, User, Client, ProjectStatus, ClientResponse
+    Project, User, Client, ProjectStatus
 )
 from auth import get_current_user
+from api_types import  ProjectCreate, ProjectUpdate, ProjectResponse, ProjectWithClient,ClientResponse
 
 router = APIRouter(prefix='/projects', tags=["Projects"])
 
