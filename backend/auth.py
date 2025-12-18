@@ -156,7 +156,9 @@ def get_or_create_oauth_user(
         oauth_provider=oauth_provider,
         oauth_id=oauth_id,
         avatar_url=avatar_url,
-        hashed_password=None  # OAuth users don't have passwords
+        hashed_password=None,  # OAuth users don't have passwords
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
     )
     
     session.add(user)

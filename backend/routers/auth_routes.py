@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
+from datetime import datetime, timezone
 
 from auth import verify_password, hash_password, get_current_user, create_access_token
 from models import User
@@ -34,7 +35,9 @@ def register_user(user_data: UserCreate, session:Session=Depends(get_session)):
         email=user_data.email,
         first_name=user_data.first_name,
         last_name=user_data.last_name,
-        hashed_password=hashed_password
+        hashed_password=hashed_password,
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
     )
     
     session.add(new_user)

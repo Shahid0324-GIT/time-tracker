@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, ConfigDict
+from pydantic import BaseModel, EmailStr, ConfigDict, model_validator, computed_field
 from typing import Optional
 from datetime import datetime, timezone
 from uuid import UUID
@@ -116,3 +116,100 @@ class ProjectResponse(BaseModel):
 class ProjectWithClient(ProjectResponse):
     """Project response with client details included"""
     client: Optional[ClientResponse] = None
+
+
+# ============================================
+# TIME ENTRY API MODELS
+# ============================================
+
+class TimeEntryCreate(BaseModel):
+    """Request body for creating a manual time entry"""
+    project_id: UUID
+    description: Optional[str] = None
+    start_time: datetime
+    end_time: datetime
+    is_billable: bool = True
+    
+    @model_validator(mode='after')
+    def check_times(self):
+        if self.start_time >= self.end_time:
+            raise ValueError('End time must be after start time')
+        return self
+    
+class TimeEntryManual(BaseModel):
+    """Request body for manual time entry (with duration instead of end_time)"""
+    project_id: UUID
+    description: Optional[str] = None
+    start_time: datetime
+    duration_seconds: int  
+    is_billable: bool = True
+
+class TimeEntryUpdate(BaseModel):
+    """Request body for updating a time entry"""
+    project_id: Optional[UUID] = None
+    description: Optional[str] = None
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
+    duration_seconds: Optional[int] = None
+    is_billable: Optional[bool] = None
+    
+    @model_validator(mode='after')
+    def check_times(self):
+        if self.start_time and self.end_time:
+            if self.end_time <= self.start_time:
+                raise ValueError('End time must be after start time')
+        return self
+
+
+class TimeEntryResponse(BaseModel):
+    """Response body for time entry data"""
+    id: UUID
+    user_id: UUID
+    project_id: UUID
+    description: Optional[str] = None
+    start_time: datetime
+    end_time: Optional[datetime] = None
+    duration_seconds:  Optional[int] = None
+    is_billable: bool
+    is_invoiced: bool
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+    
+    model_config = ConfigDict(from_attributes=True)
+    
+    @computed_field
+    @property
+    def computed_duration(self) -> int:
+        """Calculate duration if not stored"""
+        if self.duration_seconds:
+            return self.duration_seconds
+        
+        if self.end_time and self.start_time:
+            delta = self.end_time - self.start_time
+            return int(delta.total_seconds())
+        
+        return 0
+
+
+class TimeEntryWithProject(TimeEntryResponse):
+    """Time entry with project and client details"""
+    project: Optional[ProjectWithClient] = None
+    
+    model_config = ConfigDict(from_attributes=True)
+
+
+class TimerStartRequest(BaseModel):
+    """Request to start a timer"""
+    project_id: UUID
+    description: Optional[str] = None
+
+
+class TimerResponse(BaseModel):
+    """Response for running timer"""
+    id: UUID
+    project_id: UUID
+    description: Optional[str] = None
+    start_time: datetime
+    elapsed_seconds: int  
+    

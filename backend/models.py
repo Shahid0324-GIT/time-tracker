@@ -41,30 +41,26 @@ class User(SQLModel, table=True):
     avatar_url: Optional[str] = None      
     
     # Timestamps
-    created_at: datetime | None = Field(
-        default=None,
+    created_at: datetime = Field(
         sa_column=Column(
             DateTime(timezone=True),
             server_default=func.now(),
-            nullable=False,
-        ),
+            nullable=False
+        )
     )
-
-    updated_at: datetime | None = Field(
-        default=None,
+    updated_at: datetime = Field(
         sa_column=Column(
             DateTime(timezone=True),
             server_default=func.now(),
             onupdate=func.now(),
-            nullable=False,
-        ),
+            nullable=False
+        )
     )
     
-    # Clients
+    # Relationships
     clients: list["Client"] = Relationship(back_populates="user", cascade_delete=True)
-    
-    # Projects
     projects: list["Project"] = Relationship(back_populates='user', cascade_delete=True)
+    time_entries: list["TimeEntry"] = Relationship(back_populates='user', cascade_delete=True)
     
 # Client Table
 class Client(SQLModel, table=True):
@@ -88,23 +84,20 @@ class Client(SQLModel, table=True):
     notes: Optional[str] = Field(default=None, max_length=400)
     
     # Timestamps
-    created_at: datetime | None = Field(
-        default=None,
+    created_at: datetime = Field(
         sa_column=Column(
             DateTime(timezone=True),
             server_default=func.now(),
-            nullable=False,
-        ),
+            nullable=False
+        )
     )
-
-    updated_at: datetime | None = Field(
-        default=None,
+    updated_at: datetime = Field(
         sa_column=Column(
             DateTime(timezone=True),
             server_default=func.now(),
             onupdate=func.now(),
-            nullable=False,
-        ),
+            nullable=False
+        )
     )  
     
     # User
@@ -152,27 +145,76 @@ class Project(SQLModel, table=True):
     is_active: bool = Field(default=True)
     
     # Timestamps
-    created_at: Optional[datetime] | None = Field(
-        default=None,
+    created_at: datetime = Field(
         sa_column=Column(
             DateTime(timezone=True),
             server_default=func.now(),
-            nullable=False,
-        ),
+            nullable=False
+        )
     )
-
-    updated_at: datetime | None = Field(
-        default=None,
+    updated_at: datetime = Field(
         sa_column=Column(
             DateTime(timezone=True),
             server_default=func.now(),
             onupdate=func.now(),
-            nullable=False,
-        ),
+            nullable=False
+        )
     ) 
     
     # Relationships
     user: Optional[User] = Relationship(back_populates="projects")
     client: Optional["Client"] = Relationship(back_populates="projects")
+    time_entries: list["TimeEntry"] = Relationship(back_populates='project')
 
-    
+
+class TimeEntry(SQLModel, table=True):
+    """
+    Tracks time spent on projects.
+    Supports both running timers and manual entries.
+    """
+
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+
+    # Ownership
+    user_id: UUID = Field(foreign_key="user.id", index=True)
+    project_id: UUID = Field(foreign_key="project.id", index=True)
+    invoice_id: Optional[UUID] = Field(
+        foreign_key="invoice.id",
+        default=None,
+        index=True
+    )
+
+    # Time tracking
+    start_time: datetime = Field(index=True)
+    end_time: Optional[datetime] = None
+    duration_seconds: Optional[int] = None
+
+    description: Optional[str] = Field(default=None, max_length=500)
+
+    # Billing
+    is_billable: bool = Field(default=True)
+    is_invoiced: bool = Field(default=False)
+
+    # Soft delete
+    is_active: bool = Field(default=True)
+
+    # Timestamps
+    created_at: datetime = Field(
+        sa_column=Column(
+            DateTime(timezone=True),
+            server_default=func.now(),
+            nullable=False
+        )
+    )
+    updated_at: datetime = Field(
+        sa_column=Column(
+            DateTime(timezone=True),
+            server_default=func.now(),
+            onupdate=func.now(),
+            nullable=False
+        )
+    )
+
+    # Relationships
+    user: Optional["User"] = Relationship(back_populates="time_entries")
+    project: Optional["Project"] = Relationship(back_populates="time_entries")
