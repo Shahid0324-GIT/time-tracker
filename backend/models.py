@@ -1,7 +1,7 @@
 from sqlmodel import SQLModel, Field, Relationship, func
 from sqlalchemy import DateTime, Column
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, date
 from uuid import UUID, uuid4
 from enum import Enum
 from decimal import Decimal
@@ -16,6 +16,12 @@ class ProjectStatus(str, Enum):
     COMPLETED = "completed"
     ARCHIVED = "archived"
 
+class InvoiceStatus(str, Enum):
+    """Invoice status options"""
+    DRAFT = "draft"
+    SENT = "sent"
+    PAID = "paid"
+    OVERDUE = "overdue"
 
 # ============================================
 # DATABASE MODELS (SQLModel with table=True)
@@ -61,6 +67,7 @@ class User(SQLModel, table=True):
     clients: list["Client"] = Relationship(back_populates="user", cascade_delete=True)
     projects: list["Project"] = Relationship(back_populates='user', cascade_delete=True)
     time_entries: list["TimeEntry"] = Relationship(back_populates='user', cascade_delete=True)
+    invoices: list["Invoice"] = Relationship(back_populates="user")  
     
 # Client Table
 class Client(SQLModel, table=True):
@@ -100,11 +107,10 @@ class Client(SQLModel, table=True):
         )
     )  
     
-    # User
+    # Relationships
     user: Optional["User"] = Relationship(back_populates='clients')
-    
-    # projects
     projects: list["Project"] = Relationship(back_populates="client")
+    invoices: list["Invoice"] = Relationship(back_populates="client")
     
 # Projects
 class Project(SQLModel, table=True):
@@ -178,11 +184,11 @@ class TimeEntry(SQLModel, table=True):
     # Ownership
     user_id: UUID = Field(foreign_key="user.id", index=True)
     project_id: UUID = Field(foreign_key="project.id", index=True)
-    # invoice_id: Optional[UUID] = Field(
-    #     foreign_key="invoice.id",
-    #     default=None,
-    #     index=True
-    # )
+    invoice_id: Optional[UUID] = Field(
+        foreign_key="invoice.id",
+        default=None,
+        index=True
+    )
 
     # Time tracking
     start_time: datetime = Field(index=True)
@@ -221,3 +227,108 @@ class TimeEntry(SQLModel, table=True):
     # Relationships
     user: Optional["User"] = Relationship(back_populates="time_entries")
     project: Optional["Project"] = Relationship(back_populates="time_entries")
+    invoice: Optional["Invoice"] = Relationship(back_populates="time_entries")
+    
+
+# ============================================
+# INVOICE MODELS
+# ============================================
+
+# Invoice Table
+class Invoice(SQLModel, table=True):
+    """
+    Invoice for billing clients based on time entries
+    """
+    
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    
+    # Ownership
+    user_id: UUID = Field(foreign_key="user.id", index=True)
+    client_id: UUID = Field(foreign_key="client.id", index=True)
+    
+    # Invoice Details
+    invoice_number: str = Field(unique=True, index=True, max_length=50)
+    status: InvoiceStatus = Field(default=InvoiceStatus.DRAFT, index=True)
+    
+    # Dates
+    issue_date: date = Field(index=True)
+    due_date: date = Field(index=True)
+    
+    # Financial
+    subtotal: Decimal = Field(default=Decimal("0.00"), max_digits=10, decimal_places=2)
+    tax_rate: Decimal = Field(default=Decimal("0.00"), max_digits=5, decimal_places=4)  # e.g., 0.0800 for 8%
+    tax_amount: Decimal = Field(default=Decimal("0.00"), max_digits=10, decimal_places=2)
+    total: Decimal = Field(default=Decimal("0.00"), max_digits=10, decimal_places=2)
+    
+    # Additional Info
+    notes: Optional[str] = Field(default=None, max_length=1000)
+    payment_terms: Optional[str] = Field(default="Net 30", max_length=100)
+    
+    # Soft Delete
+    is_active: bool = Field(default=True)
+    
+    # Timestamps
+    created_at: datetime = Field(
+        sa_column=Column(
+            DateTime(timezone=True),
+            server_default=func.now(),
+            nullable=False
+        ),
+        default=None
+    )
+    updated_at: datetime = Field(
+        sa_column=Column(
+            DateTime(timezone=True),
+            server_default=func.now(),
+            onupdate=func.now(),
+            nullable=False
+        ),
+        default=None
+    )
+    
+    # Relationships
+    user: Optional["User"] = Relationship(back_populates="invoices")
+    client: Optional["Client"] = Relationship(back_populates="invoices")
+    line_items: list["InvoiceLineItem"] = Relationship(
+        back_populates="invoice",
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    )
+    time_entries: list["TimeEntry"] = Relationship(back_populates="invoice")
+
+
+
+# InvoiceLineItem Table
+class InvoiceLineItem(SQLModel, table=True):
+    """
+    Individual line items on an invoice
+    Usually one per time entry, or grouped by project
+    """
+    
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    
+    # Foreign Keys
+    invoice_id: UUID = Field(foreign_key="invoice.id", index=True)
+    time_entry_id: Optional[UUID] = Field(
+        default=None,
+        foreign_key="timeentry.id",
+        index=True
+    )
+    
+    # Line Item Details
+    description: str = Field(max_length=500)
+    quantity: Decimal = Field(max_digits=10, decimal_places=2)  # Hours
+    rate: Decimal = Field(max_digits=10, decimal_places=2)  # Hourly rate
+    amount: Decimal = Field(max_digits=10, decimal_places=2)  # quantity × rate
+    
+    # Timestamps
+    created_at: datetime = Field(
+        sa_column=Column(
+            DateTime(timezone=True),
+            server_default=func.now(),
+            nullable=False
+        ),
+        default=None
+    )
+    
+    # Relationships
+    invoice: Optional["Invoice"] = Relationship(back_populates="line_items")

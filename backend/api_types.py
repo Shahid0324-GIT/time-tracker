@@ -1,15 +1,14 @@
-from pydantic import BaseModel, EmailStr, ConfigDict, model_validator, computed_field
-from typing import Optional
-from datetime import datetime, timezone
+from pydantic import BaseModel, EmailStr, ConfigDict, model_validator, computed_field, Field
+from typing import Optional, List
+from datetime import datetime, date
 from uuid import UUID
 from decimal import Decimal
-from models import ProjectStatus
+from models import ProjectStatus, InvoiceStatus
 
 # ============================================
-# API MODELS (Pydantic BaseModel)
+# USER & AUTH
 # ============================================
 
-# User
 class UserCreate(BaseModel):
     """Request body for user registration"""
     email: EmailStr
@@ -17,12 +16,10 @@ class UserCreate(BaseModel):
     last_name: str
     password: str
 
-
 class UserLogin(BaseModel):
     """Request body for user login"""
     email: EmailStr
     password: str
-
 
 class UserResponse(BaseModel):
     """Response body for user data (no sensitive info)"""
@@ -31,18 +28,20 @@ class UserResponse(BaseModel):
     first_name: str
     last_name: str
     avatar_url: Optional[str] = None
-    created_at: Optional[datetime] = datetime.now(timezone.utc)
+    created_at: Optional[datetime] = None
     
     model_config = ConfigDict(from_attributes=True)
 
-# Token
 class Token(BaseModel):
     """Response body after successful authentication"""
     access_token: str
     token_type: str
     user: UserResponse
-    
-# Client
+
+# ============================================
+# CLIENTS
+# ============================================
+
 class ClientCreate(BaseModel):
     """Request body for creating a Client"""
     name: str
@@ -62,7 +61,7 @@ class ClientResponse(BaseModel):
     """Response body for Client data"""
     id: UUID
     name: str
-    email: Optional[str] = None  # Must match DB optionality
+    email: Optional[str] = None 
     company: Optional[str] = None
     is_active: bool
     created_at: datetime
@@ -70,7 +69,10 @@ class ClientResponse(BaseModel):
     
     model_config = ConfigDict(from_attributes=True)
 
-# Prjects
+# ============================================
+# PROJECTS
+# ============================================
+
 class ProjectCreate(BaseModel):
     """Request body for creating a project"""
     name: str
@@ -93,7 +95,6 @@ class ProjectUpdate(BaseModel):
     color: Optional[str] = None
     status: Optional[ProjectStatus] = None
 
-
 class ProjectResponse(BaseModel):
     """Response body for project data"""
     id: UUID
@@ -112,18 +113,16 @@ class ProjectResponse(BaseModel):
     
     model_config = ConfigDict(from_attributes=True)
 
-
 class ProjectWithClient(ProjectResponse):
     """Project response with client details included"""
     client: Optional[ClientResponse] = None
 
-
 # ============================================
-# TIME ENTRY API MODELS
+# TIME ENTRIES
 # ============================================
 
 class TimeEntryCreate(BaseModel):
-    """Request body for creating a manual time entry"""
+    """Request body for creating a COMPLETED manual time entry"""
     project_id: UUID
     description: Optional[str] = None
     start_time: datetime
@@ -160,7 +159,6 @@ class TimeEntryUpdate(BaseModel):
                 raise ValueError('End time must be after start time')
         return self
 
-
 class TimeEntryResponse(BaseModel):
     """Response body for time entry data"""
     id: UUID
@@ -169,12 +167,12 @@ class TimeEntryResponse(BaseModel):
     description: Optional[str] = None
     start_time: datetime
     end_time: Optional[datetime] = None
-    duration_seconds:  Optional[int] = None
+    duration_seconds: Optional[int] = None
     is_billable: bool
     is_invoiced: bool
     is_active: bool
-    created_at: datetime
-    updated_at: datetime
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
     
     model_config = ConfigDict(from_attributes=True)
     
@@ -182,7 +180,8 @@ class TimeEntryResponse(BaseModel):
     @property
     def computed_duration(self) -> int:
         """Calculate duration if not stored"""
-        if self.duration_seconds:
+        # Explicitly check for None so that 0 seconds is treated as a valid duration
+        if self.duration_seconds is not None:
             return self.duration_seconds
         
         if self.end_time and self.start_time:
@@ -191,19 +190,16 @@ class TimeEntryResponse(BaseModel):
         
         return 0
 
-
 class TimeEntryWithProject(TimeEntryResponse):
     """Time entry with project and client details"""
     project: Optional[ProjectWithClient] = None
     
     model_config = ConfigDict(from_attributes=True)
 
-
 class TimerStartRequest(BaseModel):
     """Request to start a timer"""
     project_id: UUID
     description: Optional[str] = None
-
 
 class TimerResponse(BaseModel):
     """Response for running timer"""
@@ -211,5 +207,68 @@ class TimerResponse(BaseModel):
     project_id: UUID
     description: Optional[str] = None
     start_time: datetime
-    elapsed_seconds: int  
+    elapsed_seconds: int
     
+    model_config = ConfigDict(from_attributes=True)
+
+# ============================================
+# INVOICES
+# ============================================
+
+class InvoiceLineItemResponse(BaseModel):
+    """Response for invoice line item"""
+    id: UUID
+    invoice_id: UUID
+    time_entry_id: Optional[UUID] = None
+    description: str
+    quantity: Decimal
+    rate: Decimal
+    amount: Decimal
+    created_at: datetime
+    
+    model_config = ConfigDict(from_attributes=True)
+
+class InvoiceCreate(BaseModel):
+    """Request to create/generate an invoice"""
+    client_id: UUID
+    time_entry_ids: List[UUID]
+    issue_date: date
+    due_date: date
+    tax_rate: Decimal = Decimal("0.00")
+    notes: Optional[str] = None
+    payment_terms: str = "Net 30"
+
+class InvoiceUpdate(BaseModel):
+    """Update invoice details"""
+    status: Optional[InvoiceStatus] = None
+    issue_date: Optional[date] = None
+    due_date: Optional[date] = None
+    tax_rate: Optional[Decimal] = None
+    notes: Optional[str] = None
+    payment_terms: Optional[str] = None
+
+class InvoiceResponse(BaseModel):
+    """Invoice response"""
+    id: UUID
+    user_id: UUID
+    client_id: UUID
+    invoice_number: str
+    status: InvoiceStatus
+    issue_date: date
+    due_date: date
+    subtotal: Decimal
+    tax_rate: Decimal
+    tax_amount: Decimal
+    total: Decimal
+    notes: Optional[str] = None
+    payment_terms: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+    
+    model_config = ConfigDict(from_attributes=True)
+
+class InvoiceWithDetails(InvoiceResponse):
+    """Invoice with client and line items"""
+    client: Optional[ClientResponse] = None
+    line_items: List[InvoiceLineItemResponse] = Field(default_factory=list)
+    model_config = ConfigDict(from_attributes=True)
