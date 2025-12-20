@@ -178,11 +178,11 @@ class TimeEntry(SQLModel, table=True):
     # Ownership
     user_id: UUID = Field(foreign_key="user.id", index=True)
     project_id: UUID = Field(foreign_key="project.id", index=True)
-    invoice_id: Optional[UUID] = Field(
-        foreign_key="invoice.id",
-        default=None,
-        index=True
-    )
+    # invoice_id: Optional[UUID] = Field(
+    #     foreign_key="invoice.id",
+    #     default=None,
+    #     index=True
+    # )
 
     # Time tracking
     start_time: datetime = Field(index=True)
@@ -204,7 +204,9 @@ class TimeEntry(SQLModel, table=True):
             DateTime(timezone=True),
             server_default=func.now(),
             nullable=False
-        )
+        ),
+        default=None
+        
     )
     updated_at: datetime = Field(
         sa_column=Column(
@@ -212,7 +214,8 @@ class TimeEntry(SQLModel, table=True):
             server_default=func.now(),
             onupdate=func.now(),
             nullable=False
-        )
+        ),
+        default=None
     )
 
     # Relationships

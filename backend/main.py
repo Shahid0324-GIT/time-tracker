@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 from db import create_db_and_tables
-from routers import auth_routes, oauth, clients, projects
+from routers import auth_routes, oauth, clients, projects, time_entries
 from contextlib import asynccontextmanager
 from config import SECRET_KEY, FRONTEND_URL
 
@@ -72,6 +72,7 @@ app.include_router(auth_routes.router)
 app.include_router(oauth.router)
 app.include_router(clients.router)
 app.include_router(projects.router)
+app.include_router(time_entries.router)
 
 # ============================================
 # ROOT ENDPOINTS
