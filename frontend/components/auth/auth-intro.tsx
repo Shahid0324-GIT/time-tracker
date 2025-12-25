@@ -2,14 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
-import {
-  Receipt,
-  PieChart,
-  Zap,
-  CheckCircle2,
-  Clock,
-  TrendingUp,
-} from "lucide-react";
+import { Receipt, CheckCircle2, Clock, TrendingUp } from "lucide-react";
 
 export default function AuthIntro() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -88,13 +81,6 @@ export default function AuthIntro() {
 
   return (
     <div ref={containerRef} className="relative z-10 w-full max-w-lg">
-      <div className="absolute -top-12 -left-12 opacity-20 pointer-events-none floating-icon">
-        <Zap className="w-24 h-24 text-slate-900 dark:text-white" />
-      </div>
-      <div className="absolute top-11/12 -right-16 opacity-20 pointer-events-none floating-icon">
-        <PieChart className="w-32 h-32 text-slate-900 dark:text-white" />
-      </div>
-
       <div className="bg-white/40 dark:bg-black/40 backdrop-blur-2xl border border-white/20 dark:border-white/10 rounded-3xl p-8 lg:p-12 shadow-2xl relative overflow-hidden group">
         <div className="absolute inset-0 bg-linear-to-tr from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
 
