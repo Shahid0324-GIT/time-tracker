@@ -38,7 +38,7 @@ export default function LoginPage() {
   };
 
   return (
-    <Card className="shadow-xl">
+    <Card className="shadow-xl bg-white/30 dark:bg-gray-900/30 backdrop-blur-md border border-white/20 dark:border-gray-700/20">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-bold text-center">
           Welcome back
@@ -95,7 +95,7 @@ export default function LoginPage() {
             <Separator />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-white px-2 text-muted-foreground dark:bg-gray-800 dark:text-white">
+            <span className="bg-white/30 dark:bg-gray-900/30 px-2 text-muted-foreground dark:text-white">
               Or continue with
             </span>
           </div>
