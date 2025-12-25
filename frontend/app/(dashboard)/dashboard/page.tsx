@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/stores/authStore";
-import { Loader2 } from "lucide-react";
 import { Route } from "next";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-export default function HomePage() {
+export default function Dashboard() {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
 
@@ -17,10 +16,5 @@ export default function HomePage() {
       router.push("/login");
     }
   }, [isAuthenticated, router]);
-
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <Loader2 className="h-8 w-8 animate-spin text-primary" />
-    </div>
-  );
+  return <h1>Dashboard</h1>;
 }
