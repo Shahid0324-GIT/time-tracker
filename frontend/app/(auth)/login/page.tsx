@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -18,15 +17,45 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2, Github } from "lucide-react";
 import { authApi } from "@/lib/api/auth";
 import { Route } from "next";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/lib/stores/authStore";
+import { useEffect } from "react";
+
+const loginSchema = z.object({
+  email: z.email("Invalid email address"),
+  password: z.string().min(6, "Password is required"),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const { login, isLoggingIn } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const router = useRouter();
+  const { isAuthenticated } = useAuthStore();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    login({ email, password });
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/dashboard" as Route);
+    }
+  }, [isAuthenticated, router]);
+  const { login, isLoggingIn } = useAuth();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const onSubmit = (data: LoginFormValues) => {
+    login({ email: data.email, password: data.password });
   };
 
   const handleGoogleLogin = () => {
@@ -50,31 +79,39 @@ export default function LoginPage() {
 
       <CardContent className="space-y-4">
         {/* Email/Password Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               type="email"
               placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
               disabled={isLoggingIn}
+              {...register("email")}
             />
+            {errors.email && (
+              <p className="text-xs text-red-500 font-medium">
+                {errors.email.message}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password">Password</Label>
+            </div>
             <Input
               id="password"
               type="password"
               placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
               disabled={isLoggingIn}
+              {...register("password")}
             />
+            {errors.password && (
+              <p className="text-xs text-red-500 font-medium">
+                {errors.password.message}
+              </p>
+            )}
           </div>
 
           <Button type="submit" className="w-full" disabled={isLoggingIn}>
@@ -95,7 +132,7 @@ export default function LoginPage() {
             <Separator />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-white/30 dark:bg-gray-900/30 px-2 text-muted-foreground dark:text-white">
+            <span className="bg-transparent backdrop-blur-sm px-2 text-muted-foreground dark:text-gray-400">
               Or continue with
             </span>
           </div>

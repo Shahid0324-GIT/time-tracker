@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -18,37 +17,50 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2, Github } from "lucide-react";
 import { authApi } from "@/lib/api/auth";
 import { Route } from "next";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
-export default function RegisterPage() {
-  const { register, isRegistering } = useAuth();
-  const [formData, setFormData] = useState({
-    first_name: "",
-    last_name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
+// 1. Define Zod Schema
+const registerSchema = z
+  .object({
+    first_name: z.string().min(2, "First name must be at least 2 characters"),
+    last_name: z.string().min(2, "Last name must be at least 2 characters"),
+    email: z.email("Invalid email address"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
+type RegisterFormValues = z.infer<typeof registerSchema>;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+export default function RegisterPage() {
+  const { register: registerUser, isRegistering } = useAuth();
 
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
-      return;
-    }
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      first_name: "",
+      last_name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
 
-    register({
-      first_name: formData.first_name,
-      last_name: formData.last_name,
-      email: formData.email,
-      password: formData.password,
+  const onSubmit = (data: RegisterFormValues) => {
+    registerUser({
+      first_name: data.first_name,
+      last_name: data.last_name,
+      email: data.email,
+      password: data.password,
     });
   };
 
@@ -73,34 +85,36 @@ export default function RegisterPage() {
 
       <CardContent className="space-y-4">
         {/* Registration Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label htmlFor="first_name">First Name</Label>
               <Input
                 id="first_name"
-                name="first_name"
-                type="text"
                 placeholder="John"
-                value={formData.first_name}
-                onChange={handleChange}
-                required
                 disabled={isRegistering}
+                {...register("first_name")}
               />
+              {errors.first_name && (
+                <p className="text-xs text-red-500 font-medium">
+                  {errors.first_name.message}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="last_name">Last Name</Label>
               <Input
                 id="last_name"
-                name="last_name"
-                type="text"
                 placeholder="Doe"
-                value={formData.last_name}
-                onChange={handleChange}
-                required
                 disabled={isRegistering}
+                {...register("last_name")}
               />
+              {errors.last_name && (
+                <p className="text-xs text-red-500 font-medium">
+                  {errors.last_name.message}
+                </p>
+              )}
             </div>
           </div>
 
@@ -108,44 +122,48 @@ export default function RegisterPage() {
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
-              name="email"
               type="email"
               placeholder="you@example.com"
-              value={formData.email}
-              onChange={handleChange}
-              required
               disabled={isRegistering}
+              {...register("email")}
             />
+            {errors.email && (
+              <p className="text-xs text-red-500 font-medium">
+                {errors.email.message}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
             <Input
               id="password"
-              name="password"
               type="password"
               placeholder="••••••••"
-              value={formData.password}
-              onChange={handleChange}
-              required
               disabled={isRegistering}
-              minLength={6}
+              {...register("password")}
             />
+            {errors.password && (
+              <p className="text-xs text-red-500 font-medium">
+                {errors.password.message}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="confirmPassword">Confirm Password</Label>
             <Input
               id="confirmPassword"
-              name="confirmPassword"
               type="password"
               placeholder="••••••••"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
               disabled={isRegistering}
-              minLength={6}
+              {...register("confirmPassword")}
             />
+            {errors.confirmPassword && (
+              <p className="text-xs text-red-500 font-medium">
+                {errors.confirmPassword.message}
+              </p>
+            )}
           </div>
 
           <Button type="submit" className="w-full" disabled={isRegistering}>
@@ -166,7 +184,7 @@ export default function RegisterPage() {
             <Separator />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-white px-2 text-muted-foreground dark:bg-gray-800 dark:text-white">
+            <span className="bg-transparent backdrop-blur-sm px-2 text-muted-foreground dark:text-gray-400">
               Or continue with
             </span>
           </div>
