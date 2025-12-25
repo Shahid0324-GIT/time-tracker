@@ -23,6 +23,7 @@ import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/stores/authStore";
 import { useEffect } from "react";
+import { useRequireGuest } from "@/lib/hooks/useRequireAuth";
 
 const loginSchema = z.object({
   email: z.email("Invalid email address"),
@@ -32,6 +33,7 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
+  useRequireGuest();
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
 
