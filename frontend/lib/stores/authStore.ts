@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 import { User } from "@/lib/types";
 
 interface AuthState {
@@ -10,6 +10,32 @@ interface AuthState {
   logout: () => void;
   updateUser: (user: User) => void;
 }
+
+const cookieStorage = {
+  getItem: (name: string): string | null => {
+    if (typeof window === "undefined") return null;
+
+    const matches = document.cookie.match(
+      new RegExp(
+        "(?:^|; )" + name.replace(/([.$?*|{}()[\]\\/+^])/g, "\\$1") + "=([^;]*)"
+      )
+    );
+    return matches ? decodeURIComponent(matches[1]) : null;
+  },
+  setItem: (name: string, value: string): void => {
+    if (typeof window === "undefined") return;
+
+    const maxAge = 60 * 60 * 24 * 7; // 7 days
+    document.cookie = `${name}=${encodeURIComponent(
+      value
+    )}; max-age=${maxAge}; path=/; SameSite=Lax`;
+  },
+  removeItem: (name: string): void => {
+    if (typeof window === "undefined") return;
+
+    document.cookie = `${name}=; max-age=0; path=/`;
+  },
+};
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -40,6 +66,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: "auth-storage",
+      storage: createJSONStorage(() => cookieStorage),
     }
   )
 );
