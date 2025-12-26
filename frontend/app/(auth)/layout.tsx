@@ -1,5 +1,6 @@
 import LiquidEther from "@/components/ui/liquid-ether";
 import AuthIntro from "@/components/auth/auth-intro";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export default function AuthLayout({
   children,
@@ -26,6 +27,9 @@ export default function AuthLayout({
           autoResumeDelay={3000}
           autoRampDuration={0.6}
         />
+      </div>
+      <div className="absolute top-4 right-4 z-50">
+        <ThemeToggle />
       </div>
       <div className="relative z-10 grid min-h-screen grid-cols-1 lg:grid-cols-2 pointer-events-none">
         <div className="hidden lg:flex flex-col items-center justify-center p-8 lg:p-12 xl:p-20">

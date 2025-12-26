@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { AppSidebar } from "@/components/layout/app-sidebar";
+import { DashboardHeader } from "@/components/dashboard/header/dashboard-header";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 export const metadata: Metadata = {
   title: "Time Tracker - Dashboard",
-  description:
-    "Professional time tracking and invoicing application for tracking time, managing tasks, and generating invoices efficiently.",
+  description: "Professional time tracking and invoicing application.",
 };
 
 export default function DashboardLayout({
@@ -13,11 +14,12 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <main>
-      <div className="absolute top-4 right-4 z-50">
-        <ThemeToggle />
-      </div>
-      {children}
-    </main>
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <DashboardHeader />
+        <main className="flex flex-1 flex-col gap-4 p-4 pt-0">{children}</main>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
