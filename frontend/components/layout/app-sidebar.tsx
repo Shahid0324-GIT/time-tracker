@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Command, LogOut, ChevronsUpDown, Sparkles } from "lucide-react";
+import { LogOut, ChevronsUpDown, Clock3Icon } from "lucide-react";
 
 import {
   Sidebar,
@@ -51,12 +51,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuButton size="lg" asChild>
               <Link href="/dashboard">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <Command className="size-4" />
+                  <Clock3Icon className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">FinTrack AI</span>
+                  <span className="truncate font-semibold">Time Tracker</span>
                   <span className="truncate text-xs text-muted-foreground">
-                    Enterprise
+                    Application
                   </span>
                 </div>
               </Link>
@@ -169,11 +169,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Upgrade to Pro
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
+
                 <DropdownMenuItem onClick={logout}>
                   <LogOut className="mr-2 h-4 w-4" />
                   Log out
