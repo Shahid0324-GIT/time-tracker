@@ -96,7 +96,8 @@ class Client(SQLModel, table=True):
             DateTime(timezone=True),
             server_default=func.now(),
             nullable=False
-        )
+        ),
+        default=None
     )
     updated_at: datetime = Field(
         sa_column=Column(
@@ -104,7 +105,8 @@ class Client(SQLModel, table=True):
             server_default=func.now(),
             onupdate=func.now(),
             nullable=False
-        )
+        ),
+        default=None
     )  
     
     # Relationships
@@ -156,7 +158,8 @@ class Project(SQLModel, table=True):
             DateTime(timezone=True),
             server_default=func.now(),
             nullable=False
-        )
+        ),
+        default=None
     )
     updated_at: datetime = Field(
         sa_column=Column(
@@ -164,7 +167,8 @@ class Project(SQLModel, table=True):
             server_default=func.now(),
             onupdate=func.now(),
             nullable=False
-        )
+        ),
+        default=None
     ) 
     
     # Relationships
