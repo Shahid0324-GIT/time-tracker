@@ -1,13 +1,12 @@
 "use client";
-
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/lib/stores/authStore";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Route } from "next";
 
-export default function AuthCallbackPage() {
+function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useAuthStore();
@@ -26,7 +25,6 @@ export default function AuthCallbackPage() {
       // Store token
       // We need to decode the JWT to get user info
       // Or fetch user info from /auth/me endpoint
-
       // For now, we'll just store the token and fetch user info
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`, {
         headers: {
@@ -56,5 +54,22 @@ export default function AuthCallbackPage() {
         <p className="text-muted-foreground">Completing authentication...</p>
       </div>
     </div>
+  );
+}
+
+export default function AuthCallbackPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+            <p className="text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <AuthCallbackContent />
+    </Suspense>
   );
 }
