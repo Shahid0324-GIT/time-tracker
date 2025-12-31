@@ -33,7 +33,11 @@ import { useProjects } from "@/lib/hooks/use-projects";
 import { timeEntrySchema, TimeEntryFormValues } from "@/lib/schemas";
 import { useTimeEntries } from "@/lib/hooks/use-time-entries";
 
-export function ManualEntryForm() {
+interface ManualEntryFormProps {
+  onSuccess?: () => void;
+}
+
+export function ManualEntryForm({ onSuccess }: ManualEntryFormProps) {
   const { createEntry, isCreating } = useTimeEntries();
   const { data: projects, isLoading: isLoadingProjects } = useProjects();
   const activeProjects = projects?.filter((p) => p.is_active) || [];
@@ -50,7 +54,7 @@ export function ManualEntryForm() {
     },
   });
 
-  function onSubmit(data: TimeEntryFormValues) {
+  async function onSubmit(data: TimeEntryFormValues) {
     const combineDateTime = (date: Date, timeStr: string) => {
       const [hours, minutes] = timeStr.split(":").map(Number);
       const year = date.getFullYear();
@@ -71,7 +75,8 @@ export function ManualEntryForm() {
       end_time: combineDateTime(data.date, data.end_time),
     };
 
-    createEntry(payload);
+    // Assuming createEntry handles the mutation
+    await createEntry(payload);
 
     form.reset({
       project_id: "",
@@ -81,16 +86,26 @@ export function ManualEntryForm() {
       end_time: "17:00",
       is_billable: true,
     });
+
+    if (onSuccess) {
+      onSuccess();
+    }
   }
 
+  const containerClasses = onSuccess
+    ? "space-y-6"
+    : "rounded-xl border bg-card text-card-foreground shadow-sm p-6";
+
   return (
-    <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6">
-      <div className="flex items-center gap-2 mb-6">
-        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-          <Plus className="h-4 w-4" />
+    <div className={containerClasses}>
+      {!onSuccess && (
+        <div className="flex items-center gap-2 mb-6">
+          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+            <Plus className="h-4 w-4" />
+          </div>
+          <h3 className="font-semibold text-lg">Add Manual Entry</h3>
         </div>
-        <h3 className="font-semibold text-lg">Add Manual Entry</h3>
-      </div>
+      )}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -221,14 +236,13 @@ export function ManualEntryForm() {
           </div>
 
           {/* Row 3: Billable & Submit */}
-          <div className="flex items-center justify-between pt-2">
+          <div className="flex flex-col md:flex-row gap-4 md:gap-0 items-center md:justify-between pt-2">
             <FormField
               control={form.control}
               name="is_billable"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                   <FormControl>
-                    {/* Fix: Checkbox needs specific checked/onCheckedChange handling */}
                     <Checkbox
                       checked={field.value}
                       onCheckedChange={(checked) => field.onChange(checked)}
@@ -244,7 +258,12 @@ export function ManualEntryForm() {
               )}
             />
 
-            <Button type="submit" disabled={isCreating} size="lg">
+            <Button
+              type="submit"
+              disabled={isCreating}
+              size="lg"
+              className="md:w-fit w-full"
+            >
               {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Add Entry
             </Button>
