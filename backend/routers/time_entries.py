@@ -20,11 +20,23 @@ router = APIRouter(prefix="/time-entries", tags=["Time Entries"])
 # HELPER: Calculate Duration
 # ============================================
 
+# ============================================
+# HELPER: Calculate Duration
+# ============================================
+
 def calculate_duration(start_time: datetime, end_time: Optional[datetime] = None) -> int:
     """Calculate duration in seconds between start and end time"""
+    
+    if start_time.tzinfo is None:
+        start_time = start_time.replace(tzinfo=timezone.utc)
+    
     if not end_time:
         end_time = datetime.now(timezone.utc)
+    else:
+        if end_time.tzinfo is None:
+            end_time = end_time.replace(tzinfo=timezone.utc)
     
+    # 3. Calculate delta
     delta = end_time - start_time
     return max(0, int(delta.total_seconds()))
 
