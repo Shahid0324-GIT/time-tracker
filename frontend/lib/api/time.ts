@@ -38,4 +38,20 @@ export const timeApi = {
     const { data } = await api.patch<TimerResponse>("/time-entries/timer/stop");
     return data;
   },
+
+  create: async (payload: {
+    project_id: string;
+    start_time: string;
+    end_time: string;
+    description?: string;
+    is_billable: boolean;
+  }) => {
+    const { data } = await api.post("/time-entries/", payload);
+    return data;
+  },
+
+  delete: async (id: string) => {
+    const { data } = await api.delete(`/time-entries/${id}`);
+    return data;
+  },
 };

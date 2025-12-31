@@ -10,13 +10,6 @@ interface ApiErrorResponse {
   detail: string;
 }
 
-export function useTimeEntries() {
-  return useQuery({
-    queryKey: ["time-entries"],
-    queryFn: timeApi.getAll,
-  });
-}
-
 export function useTimer() {
   const queryClient = useQueryClient();
   const { setRunningTimer, runningTimer: storeTimer } = useTimerStore();
