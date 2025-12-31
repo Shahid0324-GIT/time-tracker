@@ -13,34 +13,50 @@ interface TimerState {
   reset: () => void;
 }
 
+const parseUtcTime = (timeString: string) => {
+  if (!timeString.endsWith("Z") && !timeString.includes("+")) {
+    return new Date(timeString + "Z").getTime();
+  }
+  return new Date(timeString).getTime();
+};
+
 export const useTimerStore = create<TimerState>((set, get) => ({
   runningTimer: null,
   elapsedSeconds: 0,
   intervalId: null,
 
   setRunningTimer: (timer) => {
-    set({ runningTimer: timer });
+    const oldId = get().intervalId;
+    if (oldId) clearInterval(oldId);
+
+    set({ runningTimer: timer, intervalId: null });
+
     if (timer) {
-      set({ elapsedSeconds: timer.elapsed_seconds });
+      const now = new Date().getTime();
+      const start = parseUtcTime(timer.start_time);
+
+      const elapsed = Math.max(0, Math.floor((now - start) / 1000));
+
+      set({ elapsedSeconds: elapsed });
+
       get().startInterval();
     } else {
-      get().stopInterval();
       set({ elapsedSeconds: 0 });
     }
   },
 
   startInterval: () => {
-    // Clear existing interval
-    const currentInterval = get().intervalId;
-    if (currentInterval) {
-      clearInterval(currentInterval);
-    }
+    if (get().intervalId) return;
 
-    // Start new interval (update every second)
     const id = setInterval(() => {
-      set((state) => ({
-        elapsedSeconds: state.elapsedSeconds + 1,
-      }));
+      const timer = get().runningTimer;
+      if (timer) {
+        const now = new Date().getTime();
+        const start = parseUtcTime(timer.start_time); // Use helper here too
+        const elapsed = Math.max(0, Math.floor((now - start) / 1000));
+
+        set({ elapsedSeconds: elapsed });
+      }
     }, 1000);
 
     set({ intervalId: id });
