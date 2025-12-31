@@ -1,8 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CalendarIcon, Loader2, Plus } from "lucide-react";
+import { CalendarIcon, Loader2, Plus, Save } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils/utils";
 import { Button } from "@/components/ui/button";
@@ -32,27 +33,62 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useProjects } from "@/lib/hooks/use-projects";
 import { timeEntrySchema, TimeEntryFormValues } from "@/lib/schemas";
 import { useTimeEntries } from "@/lib/hooks/use-time-entries";
+import { TimeEntryWithProject } from "@/lib/types";
 
 interface ManualEntryFormProps {
   onSuccess?: () => void;
+  entryToEdit?: TimeEntryWithProject; // New prop
 }
 
-export function ManualEntryForm({ onSuccess }: ManualEntryFormProps) {
-  const { createEntry, isCreating } = useTimeEntries();
+export function ManualEntryForm({
+  onSuccess,
+  entryToEdit,
+}: ManualEntryFormProps) {
+  const { createEntry, isCreating, updateEntry, isUpdating } = useTimeEntries();
   const { data: projects, isLoading: isLoadingProjects } = useProjects();
   const activeProjects = projects?.filter((p) => p.is_active) || [];
 
+  // Determine default values based on entryToEdit
+  const defaultValues: Partial<TimeEntryFormValues> = entryToEdit
+    ? {
+        project_id: entryToEdit.project_id,
+        description: entryToEdit.description || "",
+        date: new Date(entryToEdit.start_time),
+        start_time: format(new Date(entryToEdit.start_time), "HH:mm"),
+        end_time: entryToEdit.end_time
+          ? format(new Date(entryToEdit.end_time), "HH:mm")
+          : "17:00",
+        is_billable: entryToEdit.is_billable,
+      }
+    : {
+        project_id: "",
+        description: "",
+        date: new Date(),
+        start_time: "09:00",
+        end_time: "17:00",
+        is_billable: true,
+      };
+
   const form = useForm<TimeEntryFormValues>({
     resolver: zodResolver(timeEntrySchema),
-    defaultValues: {
-      project_id: "",
-      description: "",
-      date: new Date(),
-      start_time: "09:00",
-      end_time: "17:00",
-      is_billable: true,
-    },
+    defaultValues: defaultValues as TimeEntryFormValues,
   });
+
+  // Reset form if entryToEdit changes (e.g. opening different items in modal)
+  useEffect(() => {
+    if (entryToEdit) {
+      form.reset({
+        project_id: entryToEdit.project_id,
+        description: entryToEdit.description || "",
+        date: new Date(entryToEdit.start_time),
+        start_time: format(new Date(entryToEdit.start_time), "HH:mm"),
+        end_time: entryToEdit.end_time
+          ? format(new Date(entryToEdit.end_time), "HH:mm")
+          : "17:00",
+        is_billable: entryToEdit.is_billable,
+      });
+    }
+  }, [entryToEdit, form]);
 
   async function onSubmit(data: TimeEntryFormValues) {
     const combineDateTime = (date: Date, timeStr: string) => {
@@ -62,8 +98,6 @@ export function ManualEntryForm({ onSuccess }: ManualEntryFormProps) {
       const day = String(date.getDate()).padStart(2, "0");
       const hoursStr = String(hours).padStart(2, "0");
       const minutesStr = String(minutes).padStart(2, "0");
-
-      // Return ISO string in local time (not converted to UTC)
       return `${year}-${month}-${day}T${hoursStr}:${minutesStr}:00`;
     };
 
@@ -75,30 +109,37 @@ export function ManualEntryForm({ onSuccess }: ManualEntryFormProps) {
       end_time: combineDateTime(data.date, data.end_time),
     };
 
-    // Assuming createEntry handles the mutation
-    await createEntry(payload);
-
-    form.reset({
-      project_id: "",
-      description: "",
-      date: new Date(),
-      start_time: "09:00",
-      end_time: "17:00",
-      is_billable: true,
-    });
+    if (entryToEdit) {
+      // UPDATE MODE
+      await updateEntry({ id: entryToEdit.id, payload });
+    } else {
+      // CREATE MODE
+      await createEntry(payload);
+      // Only reset form on create (on edit we usually close modal)
+      form.reset({
+        project_id: "",
+        description: "",
+        date: new Date(),
+        start_time: "09:00",
+        end_time: "17:00",
+        is_billable: true,
+      });
+    }
 
     if (onSuccess) {
       onSuccess();
     }
   }
 
+  const isSubmitting = isCreating || isUpdating;
+  const Container = onSuccess ? "div" : "div";
   const containerClasses = onSuccess
     ? "space-y-6"
     : "rounded-xl border bg-card text-card-foreground shadow-sm p-6";
 
   return (
-    <div className={containerClasses}>
-      {!onSuccess && (
+    <Container className={containerClasses}>
+      {!onSuccess && !entryToEdit && (
         <div className="flex items-center gap-2 mb-6">
           <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
             <Plus className="h-4 w-4" />
@@ -163,7 +204,6 @@ export function ManualEntryForm({ onSuccess }: ManualEntryFormProps) {
 
           {/* Row 2: Date & Times */}
           <div className="grid gap-4 md:grid-cols-3">
-            {/* Date Picker */}
             <FormField
               control={form.control}
               name="date"
@@ -236,7 +276,7 @@ export function ManualEntryForm({ onSuccess }: ManualEntryFormProps) {
           </div>
 
           {/* Row 3: Billable & Submit */}
-          <div className="flex flex-col md:flex-row gap-4 md:gap-0 items-center md:justify-between pt-2">
+          <div className="flex flex-col md:flex-row md:gap-0 gap-4 items-center justify-between pt-2">
             <FormField
               control={form.control}
               name="is_billable"
@@ -260,16 +300,22 @@ export function ManualEntryForm({ onSuccess }: ManualEntryFormProps) {
 
             <Button
               type="submit"
-              disabled={isCreating}
+              disabled={isSubmitting}
               size="lg"
-              className="md:w-fit w-full"
+              className="w-full md:w-fit"
             >
-              {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Add Entry
+              {isSubmitting ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : entryToEdit ? (
+                <Save className="mr-2 h-4 w-4" />
+              ) : (
+                <Plus className="mr-2 h-4 w-4" />
+              )}
+              {entryToEdit ? "Update Entry" : "Add Entry"}
             </Button>
           </div>
         </form>
       </Form>
-    </div>
+    </Container>
   );
 }

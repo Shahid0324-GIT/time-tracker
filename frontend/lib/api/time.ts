@@ -1,5 +1,6 @@
 import api from "@/lib/api/client";
 import {
+  TimeEntryCreate,
   TimeEntryWithProject,
   TimerResponse,
   TimerStartRequest,
@@ -52,6 +53,14 @@ export const timeApi = {
 
   delete: async (id: string) => {
     const { data } = await api.delete(`/time-entries/${id}`);
+    return data;
+  },
+
+  update: async ({ id, payload }: { id: string; payload: TimeEntryCreate }) => {
+    const { data } = await api.patch<TimeEntryWithProject>(
+      `/time-entries/${id}`, // Assuming this is your endpoint
+      payload
+    );
     return data;
   },
 };

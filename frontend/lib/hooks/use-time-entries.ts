@@ -30,6 +30,18 @@ export function useTimeEntries() {
     },
   });
 
+  // --- MUTATION: UPDATE ---
+  const updateMutation = useMutation({
+    mutationFn: timeApi.update,
+    onSuccess: () => {
+      toast.success("Entry updated successfully");
+      queryClient.invalidateQueries({ queryKey });
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.detail || "Failed to update entry");
+    },
+  });
+
   // --- MUTATION: DELETE ---
   const deleteMutation = useMutation({
     mutationFn: timeApi.delete,
@@ -54,5 +66,8 @@ export function useTimeEntries() {
 
     deleteEntry: deleteMutation.mutate,
     isDeleting: deleteMutation.isPending,
+
+    updateEntry: updateMutation.mutateAsync,
+    isUpdating: updateMutation.isPending,
   };
 }
