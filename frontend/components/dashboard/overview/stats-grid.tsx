@@ -1,31 +1,50 @@
-import { DollarSign, Clock, AlertCircle, TrendingUp } from "lucide-react";
-import { mockInvoices, mockTimeEntries } from "@/data/mock";
+"use client";
+
+import { DollarSign, Clock, AlertCircle, Briefcase } from "lucide-react";
+import { useInvoices } from "@/lib/hooks/use-invoices";
+import { useTimeEntries } from "@/lib/hooks/use-time";
+import { useProjects } from "@/lib/hooks/use-projects";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency, formatHours } from "@/lib/utils/format";
 import { InvoiceStatus } from "@/lib/types";
+import StatsGridSkeleton from "@/components/layout/stats-grid-skeleton";
 
 export function StatsGrid() {
-  // 1. Calculate Revenue (Paid Invoices)
-  const totalRevenue = mockInvoices
+  const { data: invoices, isLoading: isLoadingInvoices } = useInvoices();
+  const { data: timeEntries, isLoading: isLoadingEntries } = useTimeEntries();
+  const { data: projects, isLoading: isLoadingProjects } = useProjects();
+
+  // --- LOADING STATE ---
+  if (isLoadingInvoices || isLoadingEntries || isLoadingProjects) {
+    return <StatsGridSkeleton />;
+  }
+
+  // --- CALCULATIONS ---
+
+  // 1. Total Revenue (Paid Invoices)
+  const totalRevenue = (invoices || [])
     .filter((inv) => inv.status === InvoiceStatus.PAID)
     .reduce((sum, inv) => sum + parseFloat(inv.total), 0);
 
-  // 2. Calculate Hours (All Time Entries)
-  const totalSeconds = mockTimeEntries.reduce(
+  // 2. Total Hours (All Time Entries)
+  const totalSeconds = (timeEntries || []).reduce(
     (sum, entry) => sum + (entry.duration_seconds || 0),
     0
   );
-  const totalHours = parseFloat(formatHours(totalSeconds));
+  const totalHours = formatHours(totalSeconds);
 
-  // 3. Calculate Outstanding (Overdue + Sent)
-  const outstandingAmount = mockInvoices
-    .filter((inv) =>
-      [InvoiceStatus.SENT, InvoiceStatus.OVERDUE].includes(inv.status)
-    )
-    .reduce((sum, inv) => sum + parseFloat(inv.total), 0);
+  // 3. Outstanding Invoices (Sent + Overdue)
+  const outstandingInvoices = (invoices || []).filter((inv) =>
+    [InvoiceStatus.SENT, InvoiceStatus.OVERDUE].includes(inv.status)
+  );
+  const outstandingAmount = outstandingInvoices.reduce(
+    (sum, inv) => sum + parseFloat(inv.total),
+    0
+  );
 
-  const outstandingCount = mockInvoices.filter(
-    (inv) => inv.status === InvoiceStatus.OVERDUE
+  // 4. Active Projects (Count)
+  const activeProjectsCount = (projects || []).filter(
+    (p) => p.is_active
   ).length;
 
   return (
@@ -42,10 +61,8 @@ export function StatsGrid() {
           <div className="text-2xl font-bold">
             {formatCurrency(totalRevenue)}
           </div>
-          <p className="text-xs text-muted-foreground flex items-center mt-1">
-            <TrendingUp className="mr-1 h-3 w-3 text-green-500" />
-            <span className="text-green-600 font-medium">+12.5%</span>
-            <span className="ml-1">from last month</span>
+          <p className="text-xs text-muted-foreground mt-1">
+            Lifetime earnings
           </p>
         </CardContent>
       </Card>
@@ -61,7 +78,7 @@ export function StatsGrid() {
         <CardContent>
           <div className="text-2xl font-bold">{totalHours}h</div>
           <p className="text-xs text-muted-foreground mt-1">
-            Across {mockTimeEntries.length} sessions
+            Across {(timeEntries || []).length} sessions
           </p>
         </CardContent>
       </Card>
@@ -70,7 +87,7 @@ export function StatsGrid() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
-            Invoices Due
+            Pending Payment
           </CardTitle>
           <AlertCircle className="h-4 w-4 text-amber-500" />
         </CardHeader>
@@ -79,23 +96,23 @@ export function StatsGrid() {
             {formatCurrency(outstandingAmount)}
           </div>
           <p className="text-xs text-muted-foreground mt-1">
-            {outstandingCount} overdue invoice(s)
+            {outstandingInvoices.length} invoice(s) due
           </p>
         </CardContent>
       </Card>
 
-      {/* Average Rate (Derived) */}
+      {/* Active Projects (Replaces generic "Avg Rate") */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
-            Avg. Hourly Rate
+            Active Projects
           </CardTitle>
-          <DollarSign className="h-4 w-4 text-muted-foreground" />
+          <Briefcase className="h-4 w-4 text-blue-500" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">$135.00</div>
+          <div className="text-2xl font-bold">{activeProjectsCount}</div>
           <p className="text-xs text-muted-foreground mt-1">
-            Based on active projects
+            Currently in progress
           </p>
         </CardContent>
       </Card>
