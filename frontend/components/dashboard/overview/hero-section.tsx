@@ -7,6 +7,7 @@ import { useTimer } from "@/lib/hooks/use-time";
 import { useProjects } from "@/lib/hooks/use-projects";
 import { useAuthStore } from "@/lib/stores/authStore";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input"; // Import Input
 import {
   Card,
   CardContent,
@@ -37,11 +38,14 @@ export function HeroSection() {
   const { data: projects, isLoading: isLoadingProjects } = useProjects();
   const { user } = useAuthStore();
   const { elapsedSeconds } = useTimerStore();
+
+  // State for the new description field
   const [selectedProject, setSelectedProject] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
 
   const activeProjects = projects?.filter((p) => p.is_active) || [];
 
-  // --- LOADING STATE (Show the "Greeting Card" shell while checking timer) ---
+  // --- LOADING STATE ---
   if (isLoadingTimer) {
     return (
       <Card className="border-l-4 border-l-primary shadow-sm h-45 flex flex-col justify-center">
@@ -68,7 +72,7 @@ export function HeroSection() {
     const project = projects?.find((p) => p.id === runningTimer.project_id);
 
     return (
-      <Card className="relative my-4 sm:my-2 overflow-hidden border transition-all duration-300 dark:border-cyan-800/30 dark:bg-linear-to-br dark:from-cyan-950 dark:via-blue-950 dark:to-indigo-950 dark:shadow-2xl dark:shadow-cyan-500/10 border-cyan-200/50 bg-linear-to-br from-cyan-50 via-blue-50 to-indigo-100 shadow-xl shadow-blue-500/5 rounded-2xl">
+      <Card className="relative z-1 my-4 sm:my-2 overflow-hidden border transition-all duration-300 dark:border-cyan-800/30 dark:bg-linear-to-br dark:from-cyan-950 dark:via-blue-950 dark:to-indigo-950 dark:shadow-2xl dark:shadow-cyan-500/10 border-cyan-200/50 bg-linear-to-br from-cyan-50 via-blue-50 to-indigo-100 shadow-xl shadow-blue-500/5 rounded-2xl">
         {/* Animated Background Orbs */}
         <div className="absolute -right-10 -top-10 h-72 w-72 rounded-full blur-3xl transition-all duration-700 dark:bg-cyan-500/20 bg-cyan-300/30 animate-pulse" />
         <div className="absolute -left-10 -bottom-10 h-64 w-64 rounded-full blur-3xl transition-all duration-700 dark:bg-indigo-500/20 bg-indigo-300/30 animate-pulse" />
@@ -143,8 +147,10 @@ export function HeroSection() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col gap-4 md:flex-row">
-          <div className="flex-1">
+        {/* Updated Layout for Project + Description + Button */}
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+          {/* 1. Project Selector */}
+          <div className="w-full lg:w-70">
             <Select
               value={selectedProject}
               onValueChange={setSelectedProject}
@@ -180,11 +186,33 @@ export function HeroSection() {
               </SelectContent>
             </Select>
           </div>
+
+          {/* 2. Description Input (New) */}
+          <div className="flex-1">
+            <Input
+              placeholder="What are you working on?"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="h-12 text-base"
+            />
+          </div>
+
+          {/* 3. Start Button */}
           <Button
-            onClick={() => startTimer({ project_id: selectedProject })}
-            disabled={!selectedProject || isStarting}
+            onClick={() =>
+              startTimer(
+                { project_id: selectedProject, description: description },
+                {
+                  onSuccess: () => {
+                    setDescription(""); // Clear input on success
+                  },
+                }
+              )
+            }
+            // Require both Project AND Description (remove !description if you want it optional)
+            disabled={!selectedProject || !description || isStarting}
             size="lg"
-            className="h-12 px-8 text-base shadow-lg transition-all hover:scale-[1.02]"
+            className="h-12 px-8 text-base shadow-lg transition-all hover:scale-[1.02] w-full lg:w-auto"
           >
             {isStarting ? (
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
