@@ -30,17 +30,21 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { NAV_ITEMS, SECONDARY_NAV_ITEMS } from "@/lib/config/navigation";
-import { mockUser } from "@/data/mock"; // Using mock data for now
+// import { mockUser } from "@/data/mock"; // Using mock data for now
 import { useAuthStore } from "@/lib/stores/authStore";
 import { getInitials } from "@/lib/utils/format";
 import { Route } from "next";
+import { SidebarSkeleton } from "./app-sidebar-skeleton";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const { logout } = useAuthStore();
 
-  // Use mock user if not authenticated (for design testing)
-  const user = mockUser;
+  const user = useAuthStore((state) => state.user);
+
+  if (!user) {
+    return <SidebarSkeleton {...props} />;
+  }
 
   return (
     <Sidebar collapsible="icon" {...props}>
