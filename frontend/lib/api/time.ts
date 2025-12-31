@@ -6,10 +6,20 @@ import {
   TimerStartRequest,
 } from "@/lib/types";
 
+export interface TimeEntryFilters {
+  start_date?: string;
+  end_date?: string;
+  project_id?: string;
+  is_billable?: boolean;
+  limit?: number;
+}
+
 export const timeApi = {
   // Get all entries (we will filter client-side for the dashboard stats for now)
-  getAll: async () => {
-    const { data } = await api.get<TimeEntryWithProject[]>("/time-entries/");
+  getAll: async (params?: TimeEntryFilters) => {
+    const { data } = await api.get<TimeEntryWithProject[]>("/time-entries/", {
+      params,
+    });
     return data;
   },
 

@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { timeApi } from "@/lib/api/time";
+import { timeApi, TimeEntryFilters } from "@/lib/api/time";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 
@@ -8,14 +8,14 @@ interface ApiError {
   detail: string;
 }
 
-export function useTimeEntries() {
+export function useTimeEntries(filters?: TimeEntryFilters) {
   const queryClient = useQueryClient();
-  const queryKey = ["time-entries"];
+  const queryKey = ["time-entries", filters];
 
   // --- QUERY: GET ALL ---
   const query = useQuery({
     queryKey,
-    queryFn: timeApi.getAll,
+    queryFn: () => timeApi.getAll(filters),
   });
 
   // --- MUTATION: CREATE ---
