@@ -22,10 +22,6 @@ function AuthCallbackContent() {
     }
 
     if (token) {
-      // Store token
-      // We need to decode the JWT to get user info
-      // Or fetch user info from /auth/me endpoint
-      // For now, we'll just store the token and fetch user info
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
