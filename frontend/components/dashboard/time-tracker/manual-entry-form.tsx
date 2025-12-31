@@ -53,12 +53,14 @@ export function ManualEntryForm() {
   function onSubmit(data: TimeEntryFormValues) {
     const combineDateTime = (date: Date, timeStr: string) => {
       const [hours, minutes] = timeStr.split(":").map(Number);
-      const newDate = new Date(date);
-      newDate.setHours(hours);
-      newDate.setMinutes(minutes);
-      newDate.setSeconds(0);
-      newDate.setMilliseconds(0);
-      return newDate.toISOString();
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      const hoursStr = String(hours).padStart(2, "0");
+      const minutesStr = String(minutes).padStart(2, "0");
+
+      // Return ISO string in local time (not converted to UTC)
+      return `${year}-${month}-${day}T${hoursStr}:${minutesStr}:00`;
     };
 
     const payload = {
@@ -70,6 +72,16 @@ export function ManualEntryForm() {
     };
 
     createEntry(payload);
+
+    // Reset form after successful submission
+    form.reset({
+      project_id: "",
+      description: "",
+      date: new Date(),
+      start_time: "09:00",
+      end_time: "17:00",
+      is_billable: true,
+    });
   }
 
   return (
@@ -93,7 +105,7 @@ export function ManualEntryForm() {
                   <FormLabel>Project</FormLabel>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    value={field.value}
                     disabled={isLoadingProjects}
                   >
                     <FormControl>
