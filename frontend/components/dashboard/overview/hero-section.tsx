@@ -36,17 +36,28 @@ export function HeroSection() {
 
   const { data: projects, isLoading: isLoadingProjects } = useProjects();
   const { user } = useAuthStore();
-
   const { elapsedSeconds } = useTimerStore();
-
   const [selectedProject, setSelectedProject] = useState<string>("");
 
-  // Loading State (Skeleton)
-  if (isLoadingTimer || isLoadingProjects) {
+  const activeProjects = projects?.filter((p) => p.is_active) || [];
+
+  // --- LOADING STATE (Show the "Greeting Card" shell while checking timer) ---
+  if (isLoadingTimer) {
     return (
-      <Card className="border-none shadow-sm h-50 w-full animate-pulse bg-muted/20">
-        <CardContent className="flex h-full items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <Card className="border-l-4 border-l-primary shadow-sm h-45 flex flex-col justify-center">
+        <CardHeader>
+          <CardTitle className="text-xl">
+            Good Morning, {user?.first_name || "Creator"}
+          </CardTitle>
+          <CardDescription>Checking your active sessions...</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-4 md:flex-row">
+            <div className="flex-1">
+              <div className="h-12 w-full animate-pulse rounded-md bg-muted" />
+            </div>
+            <div className="h-12 w-32 animate-pulse rounded-md bg-muted" />
+          </div>
         </CardContent>
       </Card>
     );
@@ -54,7 +65,6 @@ export function HeroSection() {
 
   // --- SCENARIO A: Timer is Running ---
   if (runningTimer) {
-    // Find project details to display name/color
     const project = projects?.find((p) => p.id === runningTimer.project_id);
 
     return (
@@ -122,10 +132,8 @@ export function HeroSection() {
   }
 
   // --- SCENARIO B: No Timer (Quick Start) ---
-  const activeProjects = projects?.filter((p) => p.is_active) || [];
-
   return (
-    <Card className="border-l-4 border-l-primary shadow-sm">
+    <Card className="border-l-4 border-l-primary shadow-sm transition-all duration-500 ease-in-out">
       <CardHeader>
         <CardTitle className="text-xl">
           Good Morning, {user?.first_name || "Creator"}
@@ -137,9 +145,19 @@ export function HeroSection() {
       <CardContent>
         <div className="flex flex-col gap-4 md:flex-row">
           <div className="flex-1">
-            <Select value={selectedProject} onValueChange={setSelectedProject}>
+            <Select
+              value={selectedProject}
+              onValueChange={setSelectedProject}
+              disabled={isLoadingProjects}
+            >
               <SelectTrigger className="h-12 text-base">
-                <SelectValue placeholder="Select a project..." />
+                <SelectValue
+                  placeholder={
+                    isLoadingProjects
+                      ? "Loading projects..."
+                      : "Select a project..."
+                  }
+                />
               </SelectTrigger>
               <SelectContent>
                 {activeProjects.length === 0 ? (
