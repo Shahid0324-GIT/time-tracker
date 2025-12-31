@@ -21,15 +21,15 @@ import {
 } from "@/components/ui/card";
 import { useInvoices } from "@/lib/hooks/use-invoices";
 import { useProjects } from "@/lib/hooks/use-projects";
-import { useTimeEntries } from "@/lib/hooks/use-time";
 import { InvoiceStatus } from "@/lib/types";
 import { format, subMonths } from "date-fns";
 import AnalyticsSkeletopn from "@/components/layout/analytics-skeleton";
+import { useTimeEntries } from "@/lib/hooks/use-time-entries";
 
 export function AnalyticsCharts() {
   const { data: invoices, isLoading: isLoadingInvoices } = useInvoices();
   const { data: projects, isLoading: isLoadingProjects } = useProjects();
-  const { data: timeEntries, isLoading: isLoadingTime } = useTimeEntries();
+  const { entries: timeEntries, isLoading: isLoadingTime } = useTimeEntries();
 
   // --- 1. PREPARE REVENUE DATA (Last 6 Months) ---
   const revenueData = useMemo(() => {

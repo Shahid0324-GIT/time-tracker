@@ -13,12 +13,12 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatRelativeTime, formatCurrency } from "@/lib/utils/format";
 import { useInvoices } from "@/lib/hooks/use-invoices";
-import { useTimeEntries } from "@/lib/hooks/use-time";
 import { InvoiceStatus } from "@/lib/types";
+import { useTimeEntries } from "@/lib/hooks/use-time-entries";
 
 export function ActivityTimeline() {
   const { data: invoices, isLoading: isLoadingInvoices } = useInvoices();
-  const { data: timeEntries, isLoading: isLoadingTime } = useTimeEntries();
+  const { entries: timeEntries, isLoading: isLoadingTime } = useTimeEntries();
 
   // --- MERGE & SORT DATA ---
   const activities = useMemo(() => {

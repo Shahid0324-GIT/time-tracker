@@ -2,16 +2,17 @@
 
 import { DollarSign, Clock, AlertCircle, Briefcase } from "lucide-react";
 import { useInvoices } from "@/lib/hooks/use-invoices";
-import { useTimeEntries } from "@/lib/hooks/use-time";
 import { useProjects } from "@/lib/hooks/use-projects";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency, formatHours } from "@/lib/utils/format";
 import { InvoiceStatus } from "@/lib/types";
 import StatsGridSkeleton from "@/components/layout/stats-grid-skeleton";
+import { useTimeEntries } from "@/lib/hooks/use-time-entries";
 
 export function StatsGrid() {
   const { data: invoices, isLoading: isLoadingInvoices } = useInvoices();
-  const { data: timeEntries, isLoading: isLoadingEntries } = useTimeEntries();
+  const { entries: timeEntries, isLoading: isLoadingEntries } =
+    useTimeEntries();
   const { data: projects, isLoading: isLoadingProjects } = useProjects();
 
   // --- LOADING STATE ---
