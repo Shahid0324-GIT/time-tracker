@@ -73,7 +73,6 @@ export function ManualEntryForm() {
 
     createEntry(payload);
 
-    // Reset form after successful submission
     form.reset({
       project_id: "",
       description: "",
