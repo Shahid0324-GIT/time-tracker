@@ -49,14 +49,12 @@ export function DailyTimeList() {
       }
 
       groups[dateKey].entries.push(entry);
-      // Only add duration if it exists (running timers might be null/0)
       groups[dateKey].totalSeconds += entry.duration_seconds || 0;
 
       return groups;
     }, {} as Record<string, GroupedEntry>);
   }, [entries]);
 
-  // Convert groups object to array for rendering
   const days = Object.values(groupedEntries);
 
   // --- STATES ---
