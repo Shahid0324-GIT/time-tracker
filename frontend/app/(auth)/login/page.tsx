@@ -20,9 +20,6 @@ import { Route } from "next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/lib/stores/authStore";
-import { useEffect } from "react";
 import { useRequireGuest } from "@/lib/hooks/useRequireAuth";
 
 const loginSchema = z.object({
@@ -34,14 +31,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   useRequireGuest();
-  const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.push("/dashboard" as Route);
-    }
-  }, [isAuthenticated, router]);
   const { login, isLoggingIn } = useAuth();
 
   const {
