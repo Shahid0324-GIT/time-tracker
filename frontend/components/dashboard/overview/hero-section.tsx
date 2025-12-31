@@ -137,7 +137,7 @@ export function HeroSection() {
 
   // --- SCENARIO B: No Timer (Quick Start) ---
   return (
-    <Card className="border-l-4 border-l-primary shadow-sm transition-all duration-500 ease-in-out">
+    <Card className="border-l-4 my-4 sm:my-2 border-l-primary shadow-sm transition-all duration-500 ease-in-out">
       <CardHeader>
         <CardTitle className="text-xl">
           Good Morning, {user?.first_name || "Creator"}
@@ -147,7 +147,6 @@ export function HeroSection() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {/* Updated Layout for Project + Description + Button */}
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
           {/* 1. Project Selector */}
           <div className="w-full lg:w-70">
@@ -187,7 +186,6 @@ export function HeroSection() {
             </Select>
           </div>
 
-          {/* 2. Description Input (New) */}
           <div className="flex-1">
             <Input
               placeholder="What are you working on?"
@@ -197,19 +195,17 @@ export function HeroSection() {
             />
           </div>
 
-          {/* 3. Start Button */}
           <Button
             onClick={() =>
               startTimer(
                 { project_id: selectedProject, description: description },
                 {
                   onSuccess: () => {
-                    setDescription(""); // Clear input on success
+                    setDescription("");
                   },
                 }
               )
             }
-            // Require both Project AND Description (remove !description if you want it optional)
             disabled={!selectedProject || !description || isStarting}
             size="lg"
             className="h-12 px-8 text-base shadow-lg transition-all hover:scale-[1.02] w-full lg:w-auto"
