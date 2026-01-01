@@ -491,7 +491,7 @@ def generate_invoice_pdf(
     elements.append(Paragraph(bill_to_text, styles['Normal']))
     elements.append(Spacer(1, 0.4*inch))
     
-    # Line items table
+    # Line items table - FIXED COLUMN WIDTHS
     line_items_data = [
         ['Description', 'Hours', 'Rate', 'Amount']
     ]
@@ -504,7 +504,7 @@ def generate_invoice_pdf(
             f"${float(item.amount):.2f}"
         ])
     
-    line_items_table = Table(line_items_data, colWidths=[3.5*inch, 1*inch, 1*inch, 1*inch])
+    line_items_table = Table(line_items_data, colWidths=[3*inch, 1.2*inch, 1.15*inch, 1.15*inch])
     line_items_table.setStyle(TableStyle([
         # Header row
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e40af')),
@@ -512,14 +512,17 @@ def generate_invoice_pdf(
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('FONTSIZE', (0, 0), (-1, 0), 11),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('ALIGN', (0, 0), (0, 0), 'LEFT'),  
+        ('ALIGN', (1, 0), (-1, 0), 'RIGHT'),  
         
         # Data rows
         ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
         ('FONTSIZE', (0, 1), (-1, -1), 10),
-        ('ALIGN', (1, 1), (-1, -1), 'RIGHT'),
-        ('ALIGN', (0, 1), (0, -1), 'LEFT'),
+        ('ALIGN', (1, 1), (-1, -1), 'RIGHT'),  
+        ('ALIGN', (0, 1), (0, -1), 'LEFT'),  
         ('BOTTOMPADDING', (0, 1), (-1, -1), 8),
         ('TOPPADDING', (0, 1), (-1, -1), 8),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),  
         
         # Grid
         ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
