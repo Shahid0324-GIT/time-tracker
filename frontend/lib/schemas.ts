@@ -47,3 +47,12 @@ export const formSchema = z.object({
 });
 
 export type FormValues = z.infer<typeof formSchema>;
+
+export const clientFormSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.email("Invalid email address").optional().or(z.literal("")),
+  company: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+export type ClientFormValues = z.infer<typeof clientFormSchema>;

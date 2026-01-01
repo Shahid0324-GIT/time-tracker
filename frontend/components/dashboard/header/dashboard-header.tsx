@@ -49,16 +49,20 @@ import { GlobalTimerWidget } from "./global-timer-widget";
 import { useInvoices } from "@/lib/hooks/use-invoices";
 import { InvoiceStatus } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils/format";
+
+// --- FORM IMPORTS ---
 import { ProjectForm } from "@/components/dashboard/projects/project-form";
+import { ClientForm } from "@/components/dashboard/clients/client-form";
 import { ManualEntryForm } from "../time-tracker/manual-entry-form";
 
 export function DashboardHeader() {
   const pathname = usePathname();
   const segments = pathname.split("/").filter(Boolean);
 
-  // State to control the Quick Add Modals
+  // --- MODAL STATES ---
   const [isTimeEntryOpen, setIsTimeEntryOpen] = useState(false);
   const [isProjectOpen, setIsProjectOpen] = useState(false);
+  const [isClientOpen, setIsClientOpen] = useState(false);
 
   // --- NOTIFICATIONS LOGIC ---
   const { data: invoices } = useInvoices();
@@ -121,7 +125,7 @@ export function DashboardHeader() {
               <DropdownMenuLabel>Create New</DropdownMenuLabel>
               <DropdownMenuSeparator />
 
-              {/* MODAL TRIGGER: Time Entry */}
+              {/* 1. Time Entry */}
               <DropdownMenuItem
                 onSelect={() => setIsTimeEntryOpen(true)}
                 className="cursor-pointer"
@@ -130,7 +134,7 @@ export function DashboardHeader() {
                 <span>Time Entry</span>
               </DropdownMenuItem>
 
-              {/* MODAL TRIGGER: Project (Updated) */}
+              {/* 2. Project */}
               <DropdownMenuItem
                 onSelect={() => setIsProjectOpen(true)}
                 className="cursor-pointer"
@@ -139,13 +143,15 @@ export function DashboardHeader() {
                 <span>Project</span>
               </DropdownMenuItem>
 
-              {/* LINKS: Clients & Invoices */}
-              <DropdownMenuItem asChild>
-                <Link href="/dashboard/clients" className="cursor-pointer">
-                  <Users className="mr-2 h-4 w-4 text-muted-foreground" />
-                  <span>Client</span>
-                </Link>
+              {/* 3. Client (Updated) */}
+              <DropdownMenuItem
+                onSelect={() => setIsClientOpen(true)}
+                className="cursor-pointer"
+              >
+                <Users className="mr-2 h-4 w-4 text-muted-foreground" />
+                <span>Client</span>
               </DropdownMenuItem>
+
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link href="/dashboard/invoices" className="cursor-pointer">
@@ -156,7 +162,7 @@ export function DashboardHeader() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* --- NOTIFICATIONS POPOVER --- */}
+          {/* --- NOTIFICATIONS --- */}
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="ghost" size="icon" className="relative">
@@ -215,7 +221,7 @@ export function DashboardHeader() {
 
       {/* --- QUICK ADD DIALOGS --- */}
 
-      {/* 1. Time Entry Dialog */}
+      {/* 1. Time Entry */}
       <Dialog open={isTimeEntryOpen} onOpenChange={setIsTimeEntryOpen}>
         <DialogContent className="sm:max-w-150">
           <DialogHeader>
@@ -227,7 +233,7 @@ export function DashboardHeader() {
         </DialogContent>
       </Dialog>
 
-      {/* 2. Project Dialog  */}
+      {/* 2. Project */}
       <Dialog open={isProjectOpen} onOpenChange={setIsProjectOpen}>
         <DialogContent className="sm:max-w-150">
           <DialogHeader>
@@ -235,6 +241,18 @@ export function DashboardHeader() {
           </DialogHeader>
           <div className="py-4">
             <ProjectForm onSuccess={() => setIsProjectOpen(false)} />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 3. Client  */}
+      <Dialog open={isClientOpen} onOpenChange={setIsClientOpen}>
+        <DialogContent className="sm:max-w-125">
+          <DialogHeader>
+            <DialogTitle>Add New Client</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <ClientForm onSuccess={() => setIsClientOpen(false)} />
           </div>
         </DialogContent>
       </Dialog>
