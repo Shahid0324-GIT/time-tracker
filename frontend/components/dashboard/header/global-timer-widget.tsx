@@ -12,7 +12,7 @@ export function GlobalTimerWidget() {
 
   const { elapsedSeconds } = useTimerStore();
 
-  const { data: projects } = useProjects();
+  const { projects } = useProjects();
 
   if (!runningTimer) {
     return null;

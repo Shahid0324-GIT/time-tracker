@@ -30,7 +30,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"; // Import Dialog components
+} from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -49,16 +49,16 @@ import { GlobalTimerWidget } from "./global-timer-widget";
 import { useInvoices } from "@/lib/hooks/use-invoices";
 import { InvoiceStatus } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils/format";
+import { ProjectForm } from "@/components/dashboard/projects/project-form";
 import { ManualEntryForm } from "../time-tracker/manual-entry-form";
-
-// CHECK THIS PATH: Import your existing form component
 
 export function DashboardHeader() {
   const pathname = usePathname();
   const segments = pathname.split("/").filter(Boolean);
 
-  // State to control the Quick Add Modal
+  // State to control the Quick Add Modals
   const [isTimeEntryOpen, setIsTimeEntryOpen] = useState(false);
+  const [isProjectOpen, setIsProjectOpen] = useState(false);
 
   // --- NOTIFICATIONS LOGIC ---
   const { data: invoices } = useInvoices();
@@ -122,7 +122,6 @@ export function DashboardHeader() {
               <DropdownMenuSeparator />
 
               {/* MODAL TRIGGER: Time Entry */}
-              {/* We use onSelect to trigger state change */}
               <DropdownMenuItem
                 onSelect={() => setIsTimeEntryOpen(true)}
                 className="cursor-pointer"
@@ -131,13 +130,16 @@ export function DashboardHeader() {
                 <span>Time Entry</span>
               </DropdownMenuItem>
 
-              {/* LINKS: Other items remain as links for now */}
-              <DropdownMenuItem asChild>
-                <Link href="/dashboard/projects" className="cursor-pointer">
-                  <Briefcase className="mr-2 h-4 w-4 text-muted-foreground" />
-                  <span>Project</span>
-                </Link>
+              {/* MODAL TRIGGER: Project (Updated) */}
+              <DropdownMenuItem
+                onSelect={() => setIsProjectOpen(true)}
+                className="cursor-pointer"
+              >
+                <Briefcase className="mr-2 h-4 w-4 text-muted-foreground" />
+                <span>Project</span>
               </DropdownMenuItem>
+
+              {/* LINKS: Clients & Invoices */}
               <DropdownMenuItem asChild>
                 <Link href="/dashboard/clients" className="cursor-pointer">
                   <Users className="mr-2 h-4 w-4 text-muted-foreground" />
@@ -212,6 +214,8 @@ export function DashboardHeader() {
       </header>
 
       {/* --- QUICK ADD DIALOGS --- */}
+
+      {/* 1. Time Entry Dialog */}
       <Dialog open={isTimeEntryOpen} onOpenChange={setIsTimeEntryOpen}>
         <DialogContent className="sm:max-w-150">
           <DialogHeader>
@@ -219,6 +223,18 @@ export function DashboardHeader() {
           </DialogHeader>
           <div className="py-4">
             <ManualEntryForm onSuccess={() => setIsTimeEntryOpen(false)} />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 2. Project Dialog  */}
+      <Dialog open={isProjectOpen} onOpenChange={setIsProjectOpen}>
+        <DialogContent className="sm:max-w-150">
+          <DialogHeader>
+            <DialogTitle>Create New Project</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <ProjectForm onSuccess={() => setIsProjectOpen(false)} />
           </div>
         </DialogContent>
       </Dialog>
