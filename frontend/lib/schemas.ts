@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ProjectStatus } from "./types";
 
 const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
 
@@ -31,3 +32,18 @@ export const timeEntrySchema = z
   );
 
 export type TimeEntryFormValues = z.infer<typeof timeEntrySchema>;
+
+export const formSchema = z.object({
+  name: z.string().min(1, "Project name is required"),
+  client_id: z.string().optional(),
+  description: z.string().optional(),
+  hourly_rate: z
+    .string()
+    .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+      message: "Rate must be a positive number",
+    }),
+  status: z.enum(ProjectStatus),
+  color: z.string().min(1, "Color is required"),
+});
+
+export type FormValues = z.infer<typeof formSchema>;

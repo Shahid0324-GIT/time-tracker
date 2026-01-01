@@ -1,12 +1,18 @@
+import { ProjectStatus } from "../types";
+
 export const PROJECT_COLORS = [
-  "#3B82F6", // Blue
-  "#10B981", // Green
-  "#F59E0B", // Yellow
-  "#EF4444", // Red
-  "#8B5CF6", // Purple
-  "#EC4899", // Pink
-  "#06B6D4", // Cyan
-  "#F97316", // Orange
+  "#ef4444", // Red
+  "#f97316", // Orange
+  "#f59e0b", // Amber
+  "#84cc16", // Lime
+  "#10b981", // Emerald
+  "#06b6d4", // Cyan
+  "#3b82f6", // Blue
+  "#6366f1", // Indigo
+  "#8b5cf6", // Violet
+  "#d946ef", // Fuchsia
+  "#f43f5e", // Rose
+  "#64748b", // Slate
 ];
 
 export const INVOICE_STATUS_COLORS = {
@@ -17,9 +23,10 @@ export const INVOICE_STATUS_COLORS = {
 };
 
 export const PROJECT_STATUS_COLORS = {
-  active: "bg-green-100 text-green-800",
-  completed: "bg-blue-100 text-blue-800",
-  archived: "bg-gray-100 text-gray-800",
+  active: "bg-green-500/10 text-green-500 hover:bg-green-500/20",
+  completed: "bg-blue-500/10 text-blue-500 hover:bg-blue-500/20",
+  archived: "bg-gray-500/10 text-gray-500 hover:bg-gray-500/20",
+  default: "bg-gray-100 text-gray-800",
 };
 
 export const TAX_RATES = [
@@ -38,3 +45,16 @@ export const PAYMENT_TERMS = [
   "Net 30",
   "Net 60",
 ];
+
+export const getStatusColor = (status: ProjectStatus) => {
+  switch (status) {
+    case ProjectStatus.ACTIVE:
+      return PROJECT_STATUS_COLORS.active;
+    case ProjectStatus.COMPLETED:
+      return PROJECT_STATUS_COLORS.completed;
+    case ProjectStatus.ARCHIVED:
+      return PROJECT_STATUS_COLORS.archived;
+    default:
+      return PROJECT_STATUS_COLORS.default;
+  }
+};
