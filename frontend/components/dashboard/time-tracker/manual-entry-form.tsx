@@ -45,7 +45,7 @@ export function ManualEntryForm({
   entryToEdit,
 }: ManualEntryFormProps) {
   const { createEntry, isCreating, updateEntry, isUpdating } = useTimeEntries();
-  const { data: projects, isLoading: isLoadingProjects } = useProjects();
+  const { projects, isLoading: isLoadingProjects } = useProjects();
   const activeProjects = projects?.filter((p) => p.is_active) || [];
 
   // Determine default values based on entryToEdit

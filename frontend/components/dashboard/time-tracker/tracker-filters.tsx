@@ -39,7 +39,7 @@ export function TrackerFilters({
   status,
   setStatus,
 }: TrackerFiltersProps) {
-  const { data: projects } = useProjects();
+  const { projects } = useProjects();
   const activeProjects = projects?.filter((p) => p.is_active) || [];
 
   const isFiltered = projectId !== "all" || status !== "all" || dateRange?.from;
