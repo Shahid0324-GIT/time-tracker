@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export default function ClientSkeleton() {
+export default function InvoiceSkeleton() {
   return (
     <Table>
       <TableHeader>
