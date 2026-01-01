@@ -9,9 +9,10 @@ import {
   Pencil,
   Trash2,
   FolderOpen,
+  SearchX,
 } from "lucide-react";
 import { format } from "date-fns";
-import { ProjectWithClient } from "@/lib/types";
+import { ProjectWithClient, ProjectStatus } from "@/lib/types";
 import { useProjects } from "@/lib/hooks/use-projects";
 import { Button } from "@/components/ui/button";
 import {
@@ -50,9 +51,19 @@ import {
 import { ProjectForm } from "./project-form";
 import { formatCurrency } from "@/lib/utils/format";
 import { getStatusColor } from "@/lib/utils/constants";
+import { cn } from "@/lib/utils/utils";
 import ProjectsSkeleton from "@/components/layout/projects-skeleton";
 
-export function ProjectList() {
+// Define the Props interface
+interface ProjectListProps {
+  searchQuery?: string;
+  statusFilter?: string;
+}
+
+export function ProjectList({
+  searchQuery = "",
+  statusFilter = "all",
+}: ProjectListProps) {
   const { projects: rawProjects, isLoading, deleteProject } = useProjects();
   const projects = rawProjects as ProjectWithClient[] | undefined;
 
@@ -61,10 +72,28 @@ export function ProjectList() {
   );
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
 
+  // --- FILTER LOGIC ---
+  const filteredProjects = projects?.filter((project) => {
+    // 1. Search Filter (Name or Client Name)
+    const query = searchQuery.toLowerCase();
+    const matchesSearch =
+      project.name.toLowerCase().includes(query) ||
+      project.client?.name.toLowerCase().includes(query) ||
+      (query === "internal" && !project.client); // Allow searching "internal" to find internal projects
+
+    // 2. Status Filter
+    const matchesStatus =
+      statusFilter === "all" ? true : project.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
+
+  // --- LOADING STATE ---
   if (isLoading) {
     return <ProjectsSkeleton />;
   }
 
+  // --- EMPTY STATE (No projects at all) ---
   if (!projects || projects.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-xl border border-dashed p-12 text-center text-muted-foreground bg-card">
@@ -79,104 +108,126 @@ export function ProjectList() {
     );
   }
 
+  // --- EMPTY STATE (No matches for filter) ---
+  if (filteredProjects?.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
+        <div className="mb-4 rounded-full bg-muted/50 p-4">
+          <SearchX className="h-8 w-8 opacity-40" />
+        </div>
+        <h3 className="text-lg font-semibold">No matching projects</h3>
+        <p className="text-sm">Try adjusting your search or filters.</p>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {projects.map((project) => (
-          <Card
-            key={project.id}
-            className="group relative flex flex-col justify-between overflow-hidden transition-all hover:shadow-md hover:border-primary/20"
-          >
-            {/* Color Strip */}
-            <div
-              className="absolute left-0 top-0 h-full w-1.5 transition-all group-hover:w-2"
-              style={{ backgroundColor: project.color }}
-            />
+        {filteredProjects?.map((project) => {
+          const isArchived = project.status === ProjectStatus.ARCHIVED;
 
-            <CardHeader className="pb-2 pl-6">
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <CardTitle className="line-clamp-1 text-lg">
-                    {project.name}
-                  </CardTitle>
-                  <CardDescription className="flex items-center gap-1.5 text-xs">
-                    {project.client ? (
-                      <>
-                        <Briefcase className="h-3 w-3" />
-                        {project.client.name}
-                      </>
-                    ) : (
-                      <span className="italic flex items-center gap-1.5">
-                        <FolderOpen className="h-3 w-3" />
-                        Internal Project
-                      </span>
-                    )}
-                  </CardDescription>
+          return (
+            <Card
+              key={project.id}
+              className={cn(
+                "group relative flex flex-col justify-between overflow-hidden transition-all hover:shadow-md hover:border-primary/20",
+                // Visual Dimming for Archived Projects
+                isArchived &&
+                  "opacity-60 grayscale hover:opacity-100 hover:grayscale-0 bg-muted/20"
+              )}
+            >
+              {/* Color Strip */}
+              <div
+                className="absolute left-0 top-0 h-full w-1.5 transition-all group-hover:w-2"
+                style={{ backgroundColor: project.color }}
+              />
+
+              <CardHeader className="pb-2 pl-6">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <CardTitle className="line-clamp-1 text-lg">
+                      {project.name}
+                    </CardTitle>
+                    <CardDescription className="flex items-center gap-1.5 text-xs">
+                      {project.client ? (
+                        <>
+                          <Briefcase className="h-3 w-3" />
+                          {project.client.name}
+                        </>
+                      ) : (
+                        <span className="italic flex items-center gap-1.5">
+                          <FolderOpen className="h-3 w-3" />
+                          Internal Project
+                        </span>
+                      )}
+                    </CardDescription>
+                  </div>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="-mr-2 h-8 w-8 text-muted-foreground"
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuItem
+                        onClick={() => setProjectToEdit(project)}
+                        className="cursor-pointer"
+                      >
+                        <Pencil className="mr-2 h-4 w-4" /> Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        className="text-destructive focus:text-destructive cursor-pointer"
+                        onClick={() => setProjectToDelete(project.id)}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" /> Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
+              </CardHeader>
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="-mr-2 h-8 w-8 text-muted-foreground"
-                    >
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuItem
-                      onClick={() => setProjectToEdit(project)}
-                      className="cursor-pointer"
-                    >
-                      <Pencil className="mr-2 h-4 w-4" /> Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      className="text-destructive focus:text-destructive cursor-pointer"
-                      onClick={() => setProjectToDelete(project.id)}
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" /> Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </CardHeader>
+              <CardContent className="pl-6 pb-2">
+                <p className="text-sm text-muted-foreground line-clamp-2 min-h-10 mb-3">
+                  {project.description || "No description provided."}
+                </p>
 
-            <CardContent className="pl-6 pb-2">
-              <p className="text-sm text-muted-foreground line-clamp-2 min-h-10 mb-3">
-                {project.description || "No description provided."}
-              </p>
+                <div className="flex flex-wrap gap-2">
+                  <Badge
+                    variant="secondary"
+                    className={`${getStatusColor(
+                      project.status
+                    )} border-transparent pointer-events-none`}
+                  >
+                    {project.status.toUpperCase()}
+                  </Badge>
+                </div>
+              </CardContent>
 
-              <div className="flex flex-wrap gap-2">
-                <Badge
-                  variant="secondary"
-                  className={`${getStatusColor(
-                    project.status
-                  )} border-transparent pointer-events-none`}
-                >
-                  {project.status.toUpperCase()}
-                </Badge>
-              </div>
-            </CardContent>
-
-            <CardFooter className="pl-6 pt-4 border-t bg-muted/10 text-xs text-muted-foreground flex justify-between items-center">
-              <div className="flex items-center gap-1.5" title="Hourly Rate">
-                <DollarSign className="h-3.5 w-3.5" />
-                <span className="font-medium">
-                  {formatCurrency(Number(project.hourly_rate))} / hr
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5" title="Created Date">
-                <Calendar className="h-3.5 w-3.5" />
-                <span>
-                  {format(new Date(project.created_at), "MMM d, yyyy")}
-                </span>
-              </div>
-            </CardFooter>
-          </Card>
-        ))}
+              <CardFooter className="pl-6 pt-4 border-t bg-muted/10 text-xs text-muted-foreground flex justify-between items-center">
+                <div className="flex items-center gap-1.5" title="Hourly Rate">
+                  <DollarSign className="h-3.5 w-3.5" />
+                  <span className="font-medium">
+                    {formatCurrency(Number(project.hourly_rate))} / hr
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5" title="Created Date">
+                  <Calendar className="h-3.5 w-3.5" />
+                  <span>
+                    {format(new Date(project.created_at), "MMM d, yyyy")}
+                  </span>
+                </div>
+              </CardFooter>
+            </Card>
+          );
+        })}
       </div>
 
       <Dialog
