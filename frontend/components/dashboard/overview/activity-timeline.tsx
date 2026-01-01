@@ -17,7 +17,7 @@ import { InvoiceStatus } from "@/lib/types";
 import { useTimeEntries } from "@/lib/hooks/use-time-entries";
 
 export function ActivityTimeline() {
-  const { data: invoices, isLoading: isLoadingInvoices } = useInvoices();
+  const { invoices, isLoading: isLoadingInvoices } = useInvoices();
   const { entries: timeEntries, isLoading: isLoadingTime } = useTimeEntries();
 
   // --- MERGE & SORT DATA ---

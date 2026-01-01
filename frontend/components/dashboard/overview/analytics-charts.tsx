@@ -27,7 +27,7 @@ import AnalyticsSkeletopn from "@/components/layout/analytics-skeleton";
 import { useTimeEntries } from "@/lib/hooks/use-time-entries";
 
 export function AnalyticsCharts() {
-  const { data: invoices, isLoading: isLoadingInvoices } = useInvoices();
+  const { invoices, isLoading: isLoadingInvoices } = useInvoices();
   const { projects, isLoading: isLoadingProjects } = useProjects();
   const { entries: timeEntries, isLoading: isLoadingTime } = useTimeEntries();
 

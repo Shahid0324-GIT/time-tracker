@@ -65,7 +65,7 @@ export function DashboardHeader() {
   const [isClientOpen, setIsClientOpen] = useState(false);
 
   // --- NOTIFICATIONS LOGIC ---
-  const { data: invoices } = useInvoices();
+  const { invoices } = useInvoices();
 
   const notifications = (invoices || [])
     .filter((inv) => inv.status === InvoiceStatus.OVERDUE)

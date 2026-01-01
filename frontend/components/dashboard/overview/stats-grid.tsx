@@ -10,7 +10,7 @@ import StatsGridSkeleton from "@/components/layout/stats-grid-skeleton";
 import { useTimeEntries } from "@/lib/hooks/use-time-entries";
 
 export function StatsGrid() {
-  const { data: invoices, isLoading: isLoadingInvoices } = useInvoices();
+  const { invoices, isLoading: isLoadingInvoices } = useInvoices();
   const { entries: timeEntries, isLoading: isLoadingEntries } =
     useTimeEntries();
   const { projects, isLoading: isLoadingProjects } = useProjects();
