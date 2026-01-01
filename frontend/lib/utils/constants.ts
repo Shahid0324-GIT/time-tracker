@@ -1,4 +1,4 @@
-import { ProjectStatus } from "../types";
+import { InvoiceStatus, ProjectStatus } from "../types";
 
 export const PROJECT_COLORS = [
   "#ef4444", // Red
@@ -16,10 +16,10 @@ export const PROJECT_COLORS = [
 ];
 
 export const INVOICE_STATUS_COLORS = {
-  draft: "bg-gray-100 text-gray-800",
-  sent: "bg-blue-100 text-blue-800",
-  paid: "bg-green-100 text-green-800",
-  overdue: "bg-red-100 text-red-800",
+  draft: "bg-gray-100 text-gray-600 border-gray-200",
+  sent: "bg-blue-500/10 text-blue-600 border-blue-200",
+  paid: "bg-green-500/10 text-green-600 border-green-200",
+  overdue: "bg-red-500/10 text-red-600 border-red-200",
 };
 
 export const PROJECT_STATUS_COLORS = {
@@ -56,5 +56,18 @@ export const getStatusColor = (status: ProjectStatus) => {
       return PROJECT_STATUS_COLORS.archived;
     default:
       return PROJECT_STATUS_COLORS.default;
+  }
+};
+
+export const getStatusBadge = (status: InvoiceStatus) => {
+  switch (status) {
+    case InvoiceStatus.PAID:
+      return INVOICE_STATUS_COLORS.paid;
+    case InvoiceStatus.SENT:
+      return INVOICE_STATUS_COLORS.sent;
+    case InvoiceStatus.OVERDUE:
+      return INVOICE_STATUS_COLORS.overdue;
+    default:
+      return INVOICE_STATUS_COLORS.draft;
   }
 };

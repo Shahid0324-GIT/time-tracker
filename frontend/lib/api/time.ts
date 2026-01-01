@@ -10,7 +10,9 @@ export interface TimeEntryFilters {
   start_date?: string;
   end_date?: string;
   project_id?: string;
+  client_id?: string;
   is_billable?: boolean;
+  is_invoiced?: boolean;
   limit?: number;
 }
 
@@ -68,7 +70,7 @@ export const timeApi = {
 
   update: async ({ id, payload }: { id: string; payload: TimeEntryCreate }) => {
     const { data } = await api.patch<TimeEntryWithProject>(
-      `/time-entries/${id}`, // Assuming this is your endpoint
+      `/time-entries/${id}`,
       payload
     );
     return data;

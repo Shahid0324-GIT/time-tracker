@@ -56,3 +56,15 @@ export const clientFormSchema = z.object({
 });
 
 export type ClientFormValues = z.infer<typeof clientFormSchema>;
+
+export const invoiceSchema = z.object({
+  client_id: z.string().min(1),
+  time_entry_ids: z.array(z.string()).min(1, "Select at least one time entry"),
+  issue_date: z.date(),
+  due_date: z.date(),
+  tax_rate: z.string(), // "0.10"
+  payment_terms: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+export type InvoiceFormValues = z.infer<typeof invoiceSchema>;

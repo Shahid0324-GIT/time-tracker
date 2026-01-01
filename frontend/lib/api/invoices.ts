@@ -21,7 +21,7 @@ export const invoicesApi = {
 
   // Create new invoice from time entries
   create: async (payload: InvoiceCreate) => {
-    const { data } = await api.post<Invoice>("/invoices/", payload);
+    const { data } = await api.post<Invoice>("/invoices/generate", payload);
     return data;
   },
 
@@ -34,5 +34,12 @@ export const invoicesApi = {
   delete: async (id: string) => {
     const { data } = await api.delete(`/invoices/${id}`);
     return data;
+  },
+
+  downloadPdf: async (id: string) => {
+    const response = await api.get(`/invoices/${id}/pdf`, {
+      responseType: "blob",
+    });
+    return response.data;
   },
 };
