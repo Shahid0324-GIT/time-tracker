@@ -8,11 +8,12 @@ import {
   Download,
   CheckCircle,
   Loader2,
+  Eye,
 } from "lucide-react";
 import { format } from "date-fns";
 import { InvoiceStatus } from "@/lib/types";
 import { useInvoices } from "@/lib/hooks/use-invoices";
-import { useClients } from "@/lib/hooks/use-clients"; // 1. Import useClients
+import { useClients } from "@/lib/hooks/use-clients";
 import { invoicesApi } from "@/lib/api/invoices";
 import { Button } from "@/components/ui/button";
 import {
@@ -46,6 +47,13 @@ import { formatCurrency } from "@/lib/utils/format";
 import { cn } from "@/lib/utils/utils";
 import InvoiceSkeleton from "@/components/layout/invoice-skeleton";
 import { getStatusBadge } from "@/lib/utils/constants";
+import { InvoiceView } from "./invoice-view";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 interface InvoiceListProps {
   searchQuery?: string;
@@ -58,11 +66,13 @@ export function InvoiceList({
 }: InvoiceListProps) {
   const { invoices, isLoading, deleteInvoice, updateInvoice } = useInvoices();
 
-  // 2. Fetch clients to look up names
   const { clients } = useClients();
 
   const [invoiceToDelete, setInvoiceToDelete] = useState<string | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [viewInvoiceId, setViewInvoiceId] = useState<string | null>(null);
+
+  const viewingInvoice = invoices?.find((i) => i.id === viewInvoiceId);
 
   // --- FILTER LOGIC ---
   const filteredInvoices = invoices?.filter((inv) => {
@@ -145,7 +155,6 @@ export function InvoiceList({
           </TableHeader>
           <TableBody>
             {filteredInvoices.map((inv) => {
-              // 3. Find Client Name safely
               const client = clients?.find((c) => c.id === inv.client_id);
               const clientName = inv.client?.name || client?.name || "Unknown";
 
@@ -154,11 +163,9 @@ export function InvoiceList({
                   <TableCell className="font-mono font-medium">
                     #{inv.invoice_number}
                   </TableCell>
-
                   <TableCell>
                     <span className="font-medium">{clientName}</span>
                   </TableCell>
-
                   <TableCell>
                     <Badge
                       variant="outline"
@@ -167,15 +174,12 @@ export function InvoiceList({
                       {inv.status}
                     </Badge>
                   </TableCell>
-
                   <TableCell className="text-muted-foreground text-sm">
                     {format(new Date(inv.issue_date), "MMM d, yyyy")}
                   </TableCell>
-
                   <TableCell className="text-right font-medium">
                     {formatCurrency(Number(inv.total))}
                   </TableCell>
-
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -190,7 +194,13 @@ export function InvoiceList({
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
-                        {/* Download PDF */}
+                        <DropdownMenuItem
+                          onClick={() => setViewInvoiceId(inv.id)}
+                          className="cursor-pointer"
+                        >
+                          <Eye className="mr-2 h-4 w-4" /> View Details
+                        </DropdownMenuItem>
+
                         <DropdownMenuItem
                           onClick={() =>
                             handleDownload(inv.id, inv.invoice_number)
@@ -207,7 +217,6 @@ export function InvoiceList({
 
                         <DropdownMenuSeparator />
 
-                        {/* Status Actions */}
                         {inv.status === InvoiceStatus.DRAFT && (
                           <DropdownMenuItem
                             onClick={() => markAsSent(inv.id)}
@@ -244,7 +253,26 @@ export function InvoiceList({
         </Table>
       </div>
 
-      {/* DELETE ALERT */}
+      <Sheet
+        open={!!viewInvoiceId}
+        onOpenChange={(open) => !open && setViewInvoiceId(null)}
+      >
+        <SheetContent
+          side="right"
+          className="w-full sm:max-w-3xl overflow-y-auto sm:p-6"
+        >
+          <SheetHeader className="mb-4">
+            <SheetTitle>
+              {viewingInvoice
+                ? `Invoice #${viewingInvoice.invoice_number}`
+                : "Invoice Details"}
+            </SheetTitle>
+          </SheetHeader>
+
+          {viewInvoiceId && <InvoiceView invoiceId={viewInvoiceId} />}
+        </SheetContent>
+      </Sheet>
+
       <AlertDialog
         open={!!invoiceToDelete}
         onOpenChange={(open) => !open && setInvoiceToDelete(null)}

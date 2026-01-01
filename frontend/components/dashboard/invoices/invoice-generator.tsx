@@ -126,7 +126,7 @@ export function InvoiceGenerator({ onSuccess }: InvoiceGeneratorProps) {
 
   const handleClientSelect = (clientId: string) => {
     form.setValue("client_id", clientId);
-    form.setValue("time_entry_ids", []); // Reset selection
+    form.setValue("time_entry_ids", []);
     setStep("select-time");
   };
 
@@ -151,8 +151,6 @@ export function InvoiceGenerator({ onSuccess }: InvoiceGeneratorProps) {
     onSuccess();
   };
 
-  // --- RENDER ---
-  // Vital change: The Form provider now wraps ALL steps
   return (
     <Form {...form}>
       <div className="h-full flex flex-col">
