@@ -35,7 +35,7 @@ export function HeroSection() {
     isStopping,
   } = useTimer();
 
-  const { data: projects, isLoading: isLoadingProjects } = useProjects();
+  const { projects, isLoading: isLoadingProjects } = useProjects();
   const { user } = useAuthStore();
   const { elapsedSeconds } = useTimerStore();
 

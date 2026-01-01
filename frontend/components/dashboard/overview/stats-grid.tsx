@@ -13,7 +13,7 @@ export function StatsGrid() {
   const { data: invoices, isLoading: isLoadingInvoices } = useInvoices();
   const { entries: timeEntries, isLoading: isLoadingEntries } =
     useTimeEntries();
-  const { data: projects, isLoading: isLoadingProjects } = useProjects();
+  const { projects, isLoading: isLoadingProjects } = useProjects();
 
   // --- LOADING STATE ---
   if (isLoadingInvoices || isLoadingEntries || isLoadingProjects) {

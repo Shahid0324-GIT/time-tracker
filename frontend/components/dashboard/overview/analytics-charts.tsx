@@ -28,7 +28,7 @@ import { useTimeEntries } from "@/lib/hooks/use-time-entries";
 
 export function AnalyticsCharts() {
   const { data: invoices, isLoading: isLoadingInvoices } = useInvoices();
-  const { data: projects, isLoading: isLoadingProjects } = useProjects();
+  const { projects, isLoading: isLoadingProjects } = useProjects();
   const { entries: timeEntries, isLoading: isLoadingTime } = useTimeEntries();
 
   // --- 1. PREPARE REVENUE DATA (Last 6 Months) ---
