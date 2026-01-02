@@ -7,7 +7,7 @@ import { useTimer } from "@/lib/hooks/use-time";
 import { useProjects } from "@/lib/hooks/use-projects";
 import { useAuthStore } from "@/lib/stores/authStore";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"; // Import Input
+import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -87,7 +87,7 @@ export function HeroSection() {
         />
 
         <CardContent className="relative flex h-full flex-col justify-between p-6 md:flex-row md:items-center">
-          <div className="z-10 space-y-2">
+          <div className="z-10 space-y-2 w-full">
             <div className="flex items-center gap-2 mb-3">
               <div className="h-2 w-2 rounded-full dark:bg-cyan-400 bg-cyan-600 animate-pulse shadow-lg dark:shadow-cyan-400/50 shadow-cyan-600/50" />
               <h3 className="text-sm font-semibold tracking-wide uppercase dark:text-cyan-200/90 text-cyan-700">
@@ -100,15 +100,16 @@ export function HeroSection() {
               {formatDurationTime(elapsedSeconds)}
             </p>
 
-            <div className="flex items-center gap-2 dark:text-cyan-100/80 text-cyan-800 pt-3">
-              <Briefcase className="h-4 w-4 opacity-75" />
-              <span className="font-semibold">
+            {/* Project Info - Truncated */}
+            <div className="flex items-center gap-2 dark:text-cyan-100/80 text-cyan-800 pt-3 overflow-hidden">
+              <Briefcase className="h-4 w-4 opacity-75 shrink-0" />
+              <span className="font-semibold truncate">
                 {project?.name || "Unknown Project"}
               </span>
               {runningTimer.description && (
                 <>
                   <span className="opacity-40">•</span>
-                  <span className="opacity-70 text-sm max-w-50 truncate">
+                  <span className="opacity-70 text-sm max-w-37.5 sm:max-w-xs truncate">
                     {runningTimer.description}
                   </span>
                 </>
@@ -148,14 +149,15 @@ export function HeroSection() {
       </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
-          {/* 1. Project Selector */}
-          <div className="w-full lg:w-70">
+          {/* 1. Project Selector - Fixed Mobile Truncation */}
+          <div className="w-full lg:w-72 min-w-0">
             <Select
               value={selectedProject}
               onValueChange={setSelectedProject}
               disabled={isLoadingProjects}
             >
-              <SelectTrigger className="h-12 text-base">
+              {/* Added classes to force span truncation */}
+              <SelectTrigger className="h-12 text-base w-full [&>span]:truncate [&>span]:min-w-0">
                 <SelectValue
                   placeholder={
                     isLoadingProjects
@@ -172,12 +174,12 @@ export function HeroSection() {
                 ) : (
                   activeProjects.map((project) => (
                     <SelectItem key={project.id} value={project.id}>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 max-w-62.5 sm:max-w-md">
                         <div
-                          className="h-2 w-2 rounded-full"
+                          className="h-2 w-2 rounded-full shrink-0"
                           style={{ backgroundColor: project.color }}
                         />
-                        {project.name}
+                        <span className="truncate">{project.name}</span>
                       </div>
                     </SelectItem>
                   ))
@@ -186,7 +188,8 @@ export function HeroSection() {
             </Select>
           </div>
 
-          <div className="flex-1">
+          {/* 2. Description Input */}
+          <div className="flex-1 min-w-0">
             <Input
               placeholder="What are you working on?"
               value={description}
@@ -208,7 +211,7 @@ export function HeroSection() {
             }
             disabled={!selectedProject || !description || isStarting}
             size="lg"
-            className="h-12 px-8 text-base shadow-lg transition-all hover:scale-[1.02] w-full lg:w-auto"
+            className="h-12 px-8 text-base shadow-lg transition-all hover:scale-[1.02] w-full lg:w-auto shrink-0"
           >
             {isStarting ? (
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />

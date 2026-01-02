@@ -22,11 +22,13 @@ import {
 import { formatDurationTime } from "@/lib/utils/format";
 import { TimeEntryWithProject } from "@/lib/types";
 import { useTimeEntries } from "@/lib/hooks/use-time-entries";
-// Import the new filters component
 import { TrackerFilters } from "./tracker-filters";
 import { ManualEntryForm } from "./manual-entry-form";
+// IMPORT THE HELPER
+import { parseBackendDate } from "@/lib/utils/utils";
 
 const getDateLabel = (dateString: string) => {
+  // Ensure we parse the date string correctly as a local date for comparison
   const date = new Date(dateString);
   if (isToday(date)) return "Today";
   if (isYesterday(date)) return "Yesterday";
@@ -40,21 +42,18 @@ interface GroupedEntry {
 }
 
 export function DailyTimeList() {
-  // 1. Add State for Status
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: startOfMonth(new Date()),
     to: endOfMonth(new Date()),
   });
   const [projectId, setProjectId] = useState<string>("all");
-  const [status, setStatus] = useState<string>("all"); // "all" | "billable" | "non_billable"
+  const [status, setStatus] = useState<string>("all");
 
   const [editingEntry, setEditingEntry] = useState<TimeEntryWithProject | null>(
     null
   );
 
-  // 2. Prepare filters for API
   const filters = useMemo(() => {
-    // Convert string status to boolean or undefined
     let isBillable: boolean | undefined = undefined;
     if (status === "billable") isBillable = true;
     if (status === "non_billable") isBillable = false;
@@ -70,25 +69,28 @@ export function DailyTimeList() {
         : undefined,
       project_id: projectId === "all" ? undefined : projectId,
       is_billable: isBillable,
-      limit: 500, // Explicitly request up to 500 items
+      limit: 500,
     };
   }, [dateRange, projectId, status]);
 
-  // --- DATA FETCHING ---
   const { entries, isLoading, deleteEntry, isDeleting } =
     useTimeEntries(filters);
 
-  // --- GROUPING LOGIC ---
+  // --- GROUPING LOGIC (FIXED TIMEZONE) ---
   const groupedEntries = useMemo(() => {
     if (!entries) return {};
 
+    // Sort by actual time first
     const sorted = [...entries].sort(
       (a, b) =>
-        new Date(b.start_time).getTime() - new Date(a.start_time).getTime()
+        parseBackendDate(b.start_time).getTime() -
+        parseBackendDate(a.start_time).getTime()
     );
 
     return sorted.reduce((groups, entry) => {
-      const dateKey = format(new Date(entry.start_time), "yyyy-MM-dd");
+      // FIX 1: Parse the backend date to Local Time before formatting as YYYY-MM-DD
+      // This ensures entries from 11 PM UTC (which might be 4 AM Tomorrow Local) go into the correct day bucket
+      const dateKey = format(parseBackendDate(entry.start_time), "yyyy-MM-dd");
 
       if (!groups[dateKey]) {
         groups[dateKey] = {
@@ -182,81 +184,88 @@ export function DailyTimeList() {
 
               {/* List of Entries */}
               <div className="divide-y rounded-xl border bg-card">
-                {day.entries.map((entry) => (
-                  <div
-                    key={entry.id}
-                    className="group flex flex-col gap-3 p-4 transition-colors hover:bg-muted/30 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    {/* Left: Project & Description */}
-                    <div className="flex flex-col gap-1 sm:max-w-[50%]">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
-                          style={{
-                            backgroundColor: entry.project?.color || "#ccc",
-                          }}
-                        />
-                        <span className="font-medium">
-                          {entry.project?.name || "No Project"}
-                        </span>
-                        {entry.is_billable && (
-                          <Badge
-                            variant="outline"
-                            className="text-[10px] h-5 px-1.5 text-muted-foreground"
-                          >
-                            $
-                          </Badge>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground wrap-break-word line-clamp-2">
-                        {entry.description || "No description"}
-                      </p>
-                    </div>
+                {day.entries.map((entry) => {
+                  // FIX 2: Parse times for display
+                  const startTime = parseBackendDate(entry.start_time);
+                  const endTime = entry.end_time
+                    ? parseBackendDate(entry.end_time)
+                    : null;
 
-                    {/* Right: Time & Actions */}
-                    <div className="flex items-center justify-between gap-4 sm:justify-end">
-                      <div className="flex flex-col items-end gap-0.5 text-right">
-                        <span className="font-mono text-sm font-medium">
-                          {formatDurationTime(entry.duration_seconds || 0)}
-                        </span>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          {format(new Date(entry.start_time), "HH:mm")}
-                          <span>-</span>
-                          {entry.end_time
-                            ? format(new Date(entry.end_time), "HH:mm")
-                            : "Now"}
+                  return (
+                    <div
+                      key={entry.id}
+                      className="group flex flex-col gap-3 p-4 transition-colors hover:bg-muted/30 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      {/* Left: Project & Description */}
+                      <div className="flex flex-col gap-1 sm:max-w-[50%]">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
+                            style={{
+                              backgroundColor: entry.project?.color || "#ccc",
+                            }}
+                          />
+                          <span className="font-medium">
+                            {entry.project?.name || "No Project"}
+                          </span>
+                          {entry.is_billable && (
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] h-5 px-1.5 text-muted-foreground"
+                            >
+                              $
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground wrap-break-word line-clamp-2">
+                          {entry.description || "No description"}
+                        </p>
+                      </div>
+
+                      {/* Right: Time & Actions */}
+                      <div className="flex items-center justify-between gap-4 sm:justify-end">
+                        <div className="flex flex-col items-end gap-0.5 text-right">
+                          <span className="font-mono text-sm font-medium">
+                            {formatDurationTime(entry.duration_seconds || 0)}
+                          </span>
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            {/* FIX 3: Display Correct Local Time */}
+                            {format(startTime, "HH:mm")}
+                            <span>-</span>
+                            {endTime ? format(endTime, "HH:mm") : "Now"}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                          {/* EDIT */}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-primary"
+                            onClick={() => setEditingEntry(entry)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+
+                          {/* DELETE */}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                            onClick={() => deleteEntry(entry.id)}
+                            disabled={isDeleting}
+                          >
+                            {isDeleting ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
+                          </Button>
                         </div>
                       </div>
-
-                      <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                        {/* EDIT */}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-muted-foreground hover:text-primary"
-                          onClick={() => setEditingEntry(entry)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-
-                        {/* DELETE */}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                          onClick={() => deleteEntry(entry.id)}
-                          disabled={isDeleting}
-                        >
-                          {isDeleting ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Trash2 className="h-4 w-4" />
-                          )}
-                        </Button>
-                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </Card>
           ))}
