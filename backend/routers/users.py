@@ -37,3 +37,23 @@ def update_user_me(
     session.refresh(current_user)
     
     return current_user
+
+@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+def delete_my_account(
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Permanently delete the authenticated user and all associated data.
+    """
+    try:
+        session.delete(current_user)
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+            detail="Failed to delete account"
+        )
+    
+    return None
