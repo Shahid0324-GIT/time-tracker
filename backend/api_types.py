@@ -29,8 +29,30 @@ class UserResponse(BaseModel):
     last_name: str
     avatar_url: Optional[str] = None
     created_at: Optional[datetime] = None
+    business_name: Optional[str] = None
+    business_address: Optional[str] = None
+    tax_id: Optional[str] = None
+    website: Optional[str] = None
     
     model_config = ConfigDict(from_attributes=True)
+    
+class UserUpdate(BaseModel):
+    """
+    Payload for PATCH /users/me
+    All fields are optional because we might only update one at a time.
+    """
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    email: Optional[str] = None
+    password: Optional[str] = None    
+    business_name: Optional[str] = None
+    business_address: Optional[str] = None
+    tax_id: Optional[str] = None
+    website: Optional[str] = None
+
+class PasswordChange(BaseModel):
+    old_password: str
+    new_password: str
 
 class Token(BaseModel):
     """Response body after successful authentication"""

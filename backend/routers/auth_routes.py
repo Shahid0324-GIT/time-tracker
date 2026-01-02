@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 
 from auth import verify_password, hash_password, get_current_user, create_access_token
 from models import User
-from api_types import UserCreate, UserLogin, UserResponse, Token
+from api_types import UserCreate, UserLogin, UserResponse, Token, PasswordChange
 from db import get_session
 
 # router
@@ -120,3 +120,40 @@ def get_me(current_user: User = Depends(get_current_user)):
         created_at=current_user.created_at
     )
     
+
+# ============================================
+# CHANGE PASSWORD
+# ============================================
+@router.post("/change-password", status_code=status.HTTP_200_OK)
+def change_password(
+    password_data: PasswordChange,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Change password for the logged-in user.
+    Requires 'old_password' to verify identity.
+    """
+    
+    # 1. Verify old password
+    if not current_user.hashed_password or not verify_password(password_data.old_password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect old password"
+        )
+    
+    # 2. Check strict equality (Optional: Prevent reusing same password)
+    if password_data.old_password == password_data.new_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="New password cannot be the same as the old password"
+        )
+
+    # 3. Hash new password and save
+    current_user.hashed_password = hash_password(password_data.new_password)
+    current_user.updated_at = datetime.now(timezone.utc)
+    
+    session.add(current_user)
+    session.commit()
+    
+    return {"message": "Password updated successfully"}

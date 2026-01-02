@@ -44,7 +44,13 @@ class User(SQLModel, table=True):
     # OAuth fields (for Google/GitHub login later)
     oauth_provider: Optional[str] = None  
     oauth_id: Optional[str] = None        
-    avatar_url: Optional[str] = None      
+    avatar_url: Optional[str] = None
+    
+    # Work fields
+    business_name: Optional[str] = None
+    business_address: Optional[str] = None
+    tax_id: Optional[str] = None
+    website: Optional[str] = None      
     
     # Timestamps
     created_at: datetime = Field(
