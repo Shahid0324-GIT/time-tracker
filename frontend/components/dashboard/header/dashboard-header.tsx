@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
@@ -54,6 +53,7 @@ import { formatCurrency } from "@/lib/utils/format";
 import { ProjectForm } from "@/components/dashboard/projects/project-form";
 import { ClientForm } from "@/components/dashboard/clients/client-form";
 import { ManualEntryForm } from "../time-tracker/manual-entry-form";
+import { InvoiceGenerator } from "@/components/dashboard/invoices/invoice-generator"; // NEW IMPORT
 
 export function DashboardHeader() {
   const pathname = usePathname();
@@ -63,6 +63,7 @@ export function DashboardHeader() {
   const [isTimeEntryOpen, setIsTimeEntryOpen] = useState(false);
   const [isProjectOpen, setIsProjectOpen] = useState(false);
   const [isClientOpen, setIsClientOpen] = useState(false);
+  const [isInvoiceOpen, setIsInvoiceOpen] = useState(false); // NEW STATE
 
   // --- NOTIFICATIONS LOGIC ---
   const { invoices } = useInvoices();
@@ -143,7 +144,7 @@ export function DashboardHeader() {
                 <span>Project</span>
               </DropdownMenuItem>
 
-              {/* 3. Client (Updated) */}
+              {/* 3. Client */}
               <DropdownMenuItem
                 onSelect={() => setIsClientOpen(true)}
                 className="cursor-pointer"
@@ -153,11 +154,14 @@ export function DashboardHeader() {
               </DropdownMenuItem>
 
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href="/dashboard/invoices" className="cursor-pointer">
-                  <FileText className="mr-2 h-4 w-4 text-muted-foreground" />
-                  <span>Invoice</span>
-                </Link>
+
+              {/* 4. Invoice (UPDATED to trigger Modal) */}
+              <DropdownMenuItem
+                onSelect={() => setIsInvoiceOpen(true)}
+                className="cursor-pointer"
+              >
+                <FileText className="mr-2 h-4 w-4 text-muted-foreground" />
+                <span>Invoice</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -245,7 +249,7 @@ export function DashboardHeader() {
         </DialogContent>
       </Dialog>
 
-      {/* 3. Client  */}
+      {/* 3. Client */}
       <Dialog open={isClientOpen} onOpenChange={setIsClientOpen}>
         <DialogContent className="sm:max-w-125">
           <DialogHeader>
@@ -253,6 +257,18 @@ export function DashboardHeader() {
           </DialogHeader>
           <div className="py-4">
             <ClientForm onSuccess={() => setIsClientOpen(false)} />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 4. Invoice (NEW) */}
+      <Dialog open={isInvoiceOpen} onOpenChange={setIsInvoiceOpen}>
+        <DialogContent className="sm:max-w-200 h-[90vh] sm:h-auto overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Generate Invoice</DialogTitle>
+          </DialogHeader>
+          <div className="py-2">
+            <InvoiceGenerator onSuccess={() => setIsInvoiceOpen(false)} />
           </div>
         </DialogContent>
       </Dialog>
