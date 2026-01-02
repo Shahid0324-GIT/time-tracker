@@ -261,7 +261,7 @@ export function DashboardHeader() {
         </DialogContent>
       </Dialog>
 
-      {/* 4. Invoice (NEW) */}
+      {/* 4. Invoice */}
       <Dialog open={isInvoiceOpen} onOpenChange={setIsInvoiceOpen}>
         <DialogContent className="sm:max-w-200 h-[90vh] sm:h-auto overflow-y-auto">
           <DialogHeader>
