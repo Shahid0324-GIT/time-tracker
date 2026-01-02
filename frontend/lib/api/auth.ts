@@ -4,6 +4,8 @@ import {
   LoginCredentials,
   RegisterData,
   User,
+  UserUpdate,
+  ChangePasswordData,
 } from "@/lib/types";
 
 const BASE_API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -25,6 +27,17 @@ export const authApi = {
   getMe: async (): Promise<User> => {
     const response = await api.get<User>("/auth/me");
     return response.data;
+  },
+
+  // Update Profile (PATCH /users/me)
+  updateProfile: async (data: UserUpdate): Promise<User> => {
+    const response = await api.patch<User>("/users/me", data);
+    return response.data;
+  },
+
+  // Authenticated: Change Password
+  changePassword: async (data: ChangePasswordData): Promise<void> => {
+    await api.post("/auth/change-password", data);
   },
 
   // OAuth URLs

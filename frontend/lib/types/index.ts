@@ -8,6 +8,20 @@ export interface User {
   last_name: string;
   avatar_url?: string;
   created_at: string;
+  business_name?: string;
+  business_address?: string;
+  tax_id?: string;
+  website?: string;
+}
+
+export interface UserUpdate {
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  business_name?: string;
+  business_address?: string;
+  tax_id?: string;
+  website?: string;
 }
 
 export interface AuthResponse {
@@ -26,6 +40,15 @@ export interface RegisterData {
   first_name: string;
   last_name: string;
   password: string;
+  business_name?: string;
+  business_address?: string;
+  tax_id?: string;
+  website?: string;
+}
+
+export interface ChangePasswordData {
+  old_password: string;
+  new_password: string;
 }
 
 // ==========================================

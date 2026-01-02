@@ -29,9 +29,19 @@ function AuthCallbackContent() {
       })
         .then((res) => res.json())
         .then((user) => {
+          // 1. Log the user in (save token to cookies/store)
           login(user, token);
-          toast.success("Successfully logged in!");
-          router.push("/dashboard" as Route);
+
+          // 2. CHECK: Does the user have business details set?
+          if (!user.business_name) {
+            // If not, redirect to the onboarding page
+            toast.info("Welcome! Let's set up your business profile.");
+            router.push("/complete-profile" as Route);
+          } else {
+            // If yes, go straight to dashboard
+            toast.success("Successfully logged in!");
+            router.push("/dashboard" as Route);
+          }
         })
         .catch(() => {
           toast.error("Failed to fetch user info");
@@ -47,7 +57,7 @@ function AuthCallbackContent() {
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center space-y-4">
         <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-        <p className="text-muted-foreground">Completing authentication...</p>
+        <p className="text-muted-foreground">Finalizing authentication...</p>
       </div>
     </div>
   );
