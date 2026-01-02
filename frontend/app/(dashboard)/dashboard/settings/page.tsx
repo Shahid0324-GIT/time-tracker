@@ -13,6 +13,7 @@ import {
 import { ProfileForm } from "@/components/dashboard/settings/profile-form";
 import { BusinessForm } from "@/components/dashboard/settings/business-form";
 import { ChangePasswordForm } from "@/components/dashboard/settings/change-password-form";
+import { DeleteAccountCard } from "@/components/dashboard/settings/delete-account-card";
 
 export default function SettingsPage() {
   return (
@@ -76,6 +77,9 @@ export default function SettingsPage() {
               <ChangePasswordForm />
             </CardContent>
           </Card>
+
+          {/* 3. DANGER ZONE (Delete Account) */}
+          <DeleteAccountCard />
         </TabsContent>
       </Tabs>
     </div>

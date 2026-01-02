@@ -40,6 +40,11 @@ export const authApi = {
     await api.post("/auth/change-password", data);
   },
 
+  // Delete Account
+  deleteAccount: async (): Promise<void> => {
+    await api.delete("/users/me");
+  },
+
   // OAuth URLs
   getGoogleLoginUrl: (): string => {
     return `${BASE_API_URL}/auth/google`;
