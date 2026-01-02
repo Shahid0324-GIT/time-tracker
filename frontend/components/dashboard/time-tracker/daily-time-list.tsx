@@ -9,7 +9,7 @@ import {
   endOfMonth,
 } from "date-fns";
 import { DateRange } from "react-day-picker";
-import { Trash2, CalendarDays, Loader2, Pencil } from "lucide-react";
+import { Trash2, CalendarDays, Loader2, Pencil, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -115,6 +115,53 @@ export function DailyTimeList() {
       0
     );
   }, [entries]);
+
+  const handleExportCSV = () => {
+    if (!entries || entries.length === 0) return;
+
+    const headers = [
+      "Date",
+      "Start Time",
+      "End Time",
+      "Project",
+      "Description",
+      "Duration (h)",
+      "Billable",
+    ];
+
+    const rows = entries.map((e) => {
+      const startDate = parseBackendDate(e.start_time);
+      const endDate = e.end_time ? parseBackendDate(e.end_time) : null;
+
+      return [
+        format(startDate, "yyyy-MM-dd"),
+        format(startDate, "HH:mm"),
+        endDate ? format(endDate, "HH:mm") : "Running",
+        e.project?.name || "No Project",
+        `"${e.description?.replace(/"/g, '""') || ""}"`,
+        e.duration_seconds ? (e.duration_seconds / 3600).toFixed(2) : "0.00",
+        e.is_billable ? "Yes" : "No",
+      ];
+    });
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((e) => e.join(",")),
+    ].join("\n");
+
+    // Trigger Download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `time_export_${format(new Date(), "yyyy-MM-dd")}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="space-y-6">
@@ -269,6 +316,30 @@ export function DailyTimeList() {
               </div>
             </Card>
           ))}
+        </div>
+      )}
+
+      {!isLoading && entries && (
+        <div className="flex items-center justify-between rounded-lg border bg-muted/40 px-4 py-3">
+          <span className="text-sm font-medium text-muted-foreground">
+            Total for selected period
+          </span>
+          <div className="flex items-center gap-4">
+            <span className="text-xl font-bold font-mono text-foreground">
+              {formatDurationTime(grandTotalSeconds)}
+            </span>
+            {entries.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportCSV}
+                className="h-8"
+              >
+                <Download className="mr-2 h-3.5 w-3.5" />
+                Export CSV
+              </Button>
+            )}
+          </div>
         </div>
       )}
 

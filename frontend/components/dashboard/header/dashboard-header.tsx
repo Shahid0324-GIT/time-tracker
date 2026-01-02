@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
@@ -53,7 +53,8 @@ import { formatCurrency } from "@/lib/utils/format";
 import { ProjectForm } from "@/components/dashboard/projects/project-form";
 import { ClientForm } from "@/components/dashboard/clients/client-form";
 import { ManualEntryForm } from "../time-tracker/manual-entry-form";
-import { InvoiceGenerator } from "@/components/dashboard/invoices/invoice-generator"; // NEW IMPORT
+import { InvoiceGenerator } from "@/components/dashboard/invoices/invoice-generator";
+import { useTimer } from "@/lib/hooks/use-time";
 
 export function DashboardHeader() {
   const pathname = usePathname();
@@ -63,7 +64,7 @@ export function DashboardHeader() {
   const [isTimeEntryOpen, setIsTimeEntryOpen] = useState(false);
   const [isProjectOpen, setIsProjectOpen] = useState(false);
   const [isClientOpen, setIsClientOpen] = useState(false);
-  const [isInvoiceOpen, setIsInvoiceOpen] = useState(false); // NEW STATE
+  const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
 
   // --- NOTIFICATIONS LOGIC ---
   const { invoices } = useInvoices();
@@ -79,6 +80,37 @@ export function DashboardHeader() {
     }));
 
   const hasNotifications = notifications.length > 0;
+
+  // --- SHORTCUTS LOGIC ---
+  const { runningTimer, stopTimer } = useTimer();
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey) {
+        if (e.key === "s") {
+          e.preventDefault();
+          if (runningTimer) {
+            stopTimer();
+          } else {
+            setIsTimeEntryOpen(true);
+          }
+        }
+
+        if (e.key === "e") {
+          e.preventDefault();
+          setIsTimeEntryOpen(true);
+        }
+
+        if (e.key === "i") {
+          e.preventDefault();
+          setIsInvoiceOpen(true);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [runningTimer, stopTimer]);
 
   return (
     <>
