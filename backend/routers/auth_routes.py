@@ -36,6 +36,10 @@ def register_user(user_data: UserCreate, session:Session=Depends(get_session)):
         first_name=user_data.first_name,
         last_name=user_data.last_name,
         hashed_password=hashed_password,
+        business_name=user_data.business_name,
+        business_address=user_data.business_address,
+        tax_id=user_data.tax_id,
+        website=user_data.website,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
@@ -46,14 +50,18 @@ def register_user(user_data: UserCreate, session:Session=Depends(get_session)):
     
     token = create_access_token(data={"sub": str(new_user.id)})
     
-    return Token(access_token=token, token_type="bearer", user=UserResponse(
-        id=new_user.id,
-        email=new_user.email,
-        first_name=new_user.first_name,
-        last_name=new_user.last_name,
-        created_at=new_user.created_at,
-        avatar_url=new_user.avatar_url
-    ))
+    return Token(access_token=token, token_type="bearer", user= UserResponse(
+            id=new_user.id,
+            email=new_user.email,
+            first_name=new_user.first_name,
+            last_name=new_user.last_name,
+            created_at=new_user.created_at,
+            avatar_url=new_user.avatar_url,
+            business_address=new_user.business_address,
+            tax_id=new_user.tax_id,
+            website=new_user.website,
+            business_name=new_user.business_name
+        ))
     
 # ============================================
 # LOGIN EXISTING USER
@@ -96,7 +104,11 @@ def login_user(login_data: UserLogin, session:Session=Depends(get_session)):
             first_name=user.first_name,
             last_name=user.last_name,
             created_at=user.created_at,
-            avatar_url=user.avatar_url
+            avatar_url=user.avatar_url,
+            business_address=user.business_address,
+            tax_id=user.tax_id,
+            website=user.website,
+            business_name=user.business_name
         )
     )
     
@@ -117,7 +129,11 @@ def get_me(current_user: User = Depends(get_current_user)):
         first_name=current_user.first_name,
         last_name=current_user.last_name,
         avatar_url=current_user.avatar_url,
-        created_at=current_user.created_at
+        created_at=current_user.created_at,
+        business_address=current_user.business_address,
+        tax_id=current_user.tax_id,
+        website=current_user.website,
+        business_name=current_user.business_name
     )
     
 

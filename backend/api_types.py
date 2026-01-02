@@ -15,6 +15,10 @@ class UserCreate(BaseModel):
     first_name: str
     last_name: str
     password: str
+    business_name: Optional[str] = None
+    business_address: Optional[str] = None
+    tax_id: Optional[str] = None
+    website: Optional[str] = None
 
 class UserLogin(BaseModel):
     """Request body for user login"""
