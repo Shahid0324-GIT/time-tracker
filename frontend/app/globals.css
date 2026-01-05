@@ -127,3 +127,9 @@
 button {
   cursor: pointer;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .feature-panel {
+    transform: none !important;
+  }
+}
