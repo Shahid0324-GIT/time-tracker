@@ -78,7 +78,7 @@ export default function HorizontalFeatures() {
         {/* Progress Bar */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-white/10 z-50 pointer-events-none">
           <motion.div
-            className="h-full bg-gradient-to-r from-cyan-500 via-purple-500 to-green-500"
+            className="h-full bg-linear-to-r from-cyan-500 via-purple-500 to-green-500"
             style={{ scaleX: smoothProgress, transformOrigin: "0%" }}
           />
         </div>
@@ -100,13 +100,13 @@ export default function HorizontalFeatures() {
           {features.map((feature, index) => (
             <div
               key={feature.id}
-              className="w-screen h-screen flex-shrink-0 flex items-center justify-center px-6 md:px-12 lg:px-20 relative overflow-hidden bg-black"
+              className="w-screen h-screen shrink-0 flex items-center justify-center px-6 md:px-12 lg:px-20 relative overflow-hidden bg-black"
             >
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center w-full max-w-[1800px] z-10 relative">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center w-full max-w-450 z-10 relative">
                 {/* Text Side */}
                 <div className="lg:col-span-5 order-2 lg:order-1 space-y-8">
                   <div
-                    className={`text-8xl md:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-br ${feature.color} opacity-20`}
+                    className={`text-8xl md:text-9xl font-black text-transparent bg-clip-text bg-linear-to-br ${feature.color} opacity-20`}
                   >
                     0{feature.id}
                   </div>
@@ -129,7 +129,7 @@ export default function HorizontalFeatures() {
                 {/* Image Side */}
                 <div className="lg:col-span-7 order-1 lg:order-2 relative w-full group">
                   <div
-                    className={`absolute -inset-10 bg-gradient-to-r ${feature.color} blur-[120px] opacity-10 group-hover:opacity-25 transition-opacity duration-700`}
+                    className={`absolute -inset-10 bg-linear-to-r ${feature.color} blur-[120px] opacity-10 group-hover:opacity-25 transition-opacity duration-700`}
                   />
                   <div className="relative rounded-3xl border border-white/10 bg-zinc-900/50 backdrop-blur-2xl overflow-hidden shadow-2xl">
                     <Image
