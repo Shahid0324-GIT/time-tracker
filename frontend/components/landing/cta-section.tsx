@@ -69,12 +69,6 @@ export function CTASection() {
             </Button>
           </Link>
         </motion.div>
-
-        <div className="pt-8">
-          <p className="text-sm text-gray-500">
-            No credit card required • Free forever
-          </p>
-        </div>
       </div>
     </section>
   );

@@ -5,10 +5,16 @@ export function Footer() {
         {/* Small Top Links */}
         <div className="w-full flex flex-col md:flex-row justify-between items-center gap-6 text-sm text-gray-500 mb-20">
           <div className="flex gap-6">
-            <a href="#" className="hover:text-white transition-colors">
-              Twitter
+            <a
+              href="https://x.com/shahid_0324T"
+              className="hover:text-white transition-colors"
+            >
+              X (Twitter)
             </a>
-            <a href="#" className="hover:text-white transition-colors">
+            <a
+              href="https://github.com/Shahid0324-GIT/time-tracker"
+              className="hover:text-white transition-colors"
+            >
               GitHub
             </a>
           </div>

@@ -8,6 +8,7 @@ import { LayoutDashboard } from "lucide-react";
 import { useCheckAuth } from "@/lib/hooks/useRequireAuth";
 import Image from "next/image";
 import { navLinks } from "@/lib/utils/constants";
+import { ThemeToggle } from "../ui/theme-toggle";
 
 export function LandingNavbar() {
   const { scrollY } = useScroll();
@@ -131,6 +132,10 @@ export function LandingNavbar() {
               )}
             </>
           )}
+        </div>
+
+        <div className="mx-4">
+          <ThemeToggle />
         </div>
 
         {/* GRADIENT BORDER (Visible only when scrolled) */}
