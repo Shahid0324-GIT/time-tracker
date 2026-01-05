@@ -7,12 +7,11 @@ import { Button } from "@/components/ui/button";
 import { LayoutDashboard } from "lucide-react";
 import { useCheckAuth } from "@/lib/hooks/useRequireAuth";
 import Image from "next/image";
+import { navLinks } from "@/lib/utils/constants";
 
 export function LandingNavbar() {
   const { scrollY } = useScroll();
   const [isScrolled, setIsScrolled] = useState(false);
-
-  // Use your real auth hook
   const { isAuthenticated, isLoading } = useCheckAuth();
 
   useMotionValueEvent(scrollY, "change", (latest) => {
@@ -23,11 +22,6 @@ export function LandingNavbar() {
       setIsScrolled(false);
     }
   });
-
-  const navLinks = [
-    { name: "Features", href: "#features" },
-    { name: "Details", href: "#details" },
-  ];
 
   const handleScroll = (
     e: React.MouseEvent<HTMLAnchorElement>,

@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 import { BarChart3, ShieldCheck, Download, Clock } from "lucide-react";
 import { SpotlightCard } from "@/components/ui/spotlight-card";
-// 1. Import BlurText
 import BlurText from "@/components/ui/react-bits/BlurText";
 
 export function BentoGrid() {

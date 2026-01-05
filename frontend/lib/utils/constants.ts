@@ -71,3 +71,41 @@ export const getStatusBadge = (status: InvoiceStatus) => {
       return INVOICE_STATUS_COLORS.draft;
   }
 };
+
+// Define the Feature type for better TS support
+export type Feature = {
+  id: number;
+  title: string;
+  description: string;
+  image: string;
+  color: string;
+};
+
+export const features: Feature[] = [
+  {
+    id: 1,
+    title: "Command Center",
+    description: "Your entire freelance business at a glance...",
+    image: "/landing/feature-overview.png",
+    color: "from-cyan-500 to-blue-500",
+  },
+  {
+    id: 2,
+    title: "Project Workflow",
+    description: "Manage clients and projects without the clutter...",
+    image: "/landing/feature-projects.png",
+    color: "from-purple-500 to-pink-500",
+  },
+  {
+    id: 3,
+    title: "Get Paid Faster",
+    description: "Turn tracked hours into professional invoices...",
+    image: "/landing/feature-invoices.png",
+    color: "from-green-500 to-emerald-500",
+  },
+];
+
+export const navLinks = [
+  { name: "Features", href: "#features" },
+  { name: "Details", href: "#details" },
+];
