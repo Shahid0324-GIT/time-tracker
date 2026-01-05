@@ -74,7 +74,10 @@ const FeatureSlide = ({
   );
 
   return (
-    <div className="w-screen h-screen shrink-0 flex items-center justify-center px-6 md:px-12 lg:px-20 relative overflow-hidden bg-black">
+    <section
+      id="features"
+      className="w-screen h-screen shrink-0 flex items-center justify-center px-6 md:px-12 lg:px-20 relative overflow-hidden bg-black scroll-mt-28"
+    >
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center w-full max-w-450 z-10 relative">
         {/* Text Side */}
         <motion.div
@@ -126,7 +129,7 @@ const FeatureSlide = ({
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

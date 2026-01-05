@@ -42,3 +42,18 @@ export function useRequireGuest() {
 
   return { isAuthenticated, isLoading };
 }
+
+export function useCheckAuth() {
+  const { isAuthenticated, user } = useAuthStore();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  return { isAuthenticated, user, isLoading };
+}

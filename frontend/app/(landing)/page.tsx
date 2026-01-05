@@ -1,20 +1,28 @@
 "use client";
 
+import { BentoGrid } from "@/components/landing/bento-grid";
+import { CTASection } from "@/components/landing/cta-section";
+import { Footer } from "@/components/landing/footer";
 import { HeroSection } from "@/components/landing/hero-section";
 import HorizontalFeatures from "@/components/landing/horizontal-features";
 
 export default function LandingPage() {
   return (
     <div className="flex flex-col items-center w-full bg-black overflow-x-clip">
+      {/* 1. Hero: The Hook */}
       <HeroSection />
 
-      {/* 2. Exploded Dashboard View */}
+      {/* 2. Features: The Tour */}
       <HorizontalFeatures />
 
-      {/* Spacer for next sections */}
-      <div className="h-screen bg-black flex items-center justify-center">
-        <h2 className="text-white text-3xl">Next: Bento Grid...</h2>
-      </div>
+      {/* 3. Details: The Specs */}
+      <BentoGrid />
+
+      {/* 4. CTA: The Close */}
+      <CTASection />
+
+      {/* 5. Footer: The Brand */}
+      <Footer />
     </div>
   );
 }
