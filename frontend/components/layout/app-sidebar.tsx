@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogOut, ChevronsUpDown, Clock3Icon } from "lucide-react";
+import { LogOut, ChevronsUpDown } from "lucide-react";
 
 import {
   Sidebar,
@@ -30,11 +30,11 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { NAV_ITEMS, SECONDARY_NAV_ITEMS } from "@/lib/config/navigation";
-// import { mockUser } from "@/data/mock"; // Using mock data for now
 import { useAuthStore } from "@/lib/stores/authStore";
 import { getInitials } from "@/lib/utils/format";
 import { Route } from "next";
 import { SidebarSkeleton } from "./app-sidebar-skeleton";
+import Image from "next/image";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
@@ -55,7 +55,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuButton size="lg" asChild>
               <Link href="/dashboard">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <Clock3Icon className="size-4" />
+                  <Image
+                    height={48}
+                    width={48}
+                    src={"/logo.svg"}
+                    alt="Logo"
+                    className="rounded-xl"
+                  />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">Time Tracker</span>
