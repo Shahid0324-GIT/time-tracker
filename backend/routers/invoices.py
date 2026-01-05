@@ -440,139 +440,196 @@ def generate_invoice_pdf(
     
     # Create PDF in memory
     buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=18)
+    # Increased margins slightly for a cleaner look
+    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=50, leftMargin=50, topMargin=50, bottomMargin=50)
     
     # Container for PDF elements
     elements = []
     
-    # Styles
+    # --- STYLES ---
     styles = getSampleStyleSheet()
-    title_style = ParagraphStyle(
-        'CustomTitle',
-        parent=styles['Heading1'],
-        fontSize=24,
-        textColor=colors.HexColor('#1e40af'),
-        spaceAfter=30,
-    )
+    # Define custom colors
+    accent_color = colors.HexColor('#2563eb') # Blue-600
+    text_color = colors.HexColor('#1f2937')   # Gray-800
+    light_text_color = colors.HexColor('#6b7280') # Gray-500
+    border_color = colors.HexColor('#e5e7eb') # Gray-200
+
+    # Custom Paragraph Styles
+    style_business_name = ParagraphStyle('BusinessName', parent=styles['Normal'], fontSize=16, leading=20, textColor=text_color, fontName='Helvetica-Bold')
+    style_header_label = ParagraphStyle('HeaderLabel', parent=styles['Normal'], fontSize=9, textColor=light_text_color, fontName='Helvetica-Bold', textTransform='uppercase')
+    style_normal = ParagraphStyle('CustomNormal', parent=styles['Normal'], fontSize=10, leading=14, textColor=text_color)
+    style_table_header = ParagraphStyle('TableHeader', parent=styles['Normal'], fontSize=9, textColor=colors.white, fontName='Helvetica-Bold')
+    style_table_cell = ParagraphStyle('TableCell', parent=styles['Normal'], fontSize=10, leading=12, textColor=text_color)
     
-    # Title
-    elements.append(Paragraph("INVOICE", title_style))
-    elements.append(Spacer(1, 0.2*inch))
+    # --- HEADER SECTION (Two Columns) ---
+    # Left: Your Business Info
+    # Right: Invoice Title & Number
     
-    # Invoice details table
-    invoice_info = [
-        ['Invoice Number:', invoice.invoice_number],
-        ['Issue Date:', invoice.issue_date.strftime('%B %d, %Y')],
-        ['Due Date:', invoice.due_date.strftime('%B %d, %Y')],
-        ['Status:', invoice.status.value.upper()],
+    # Prepare Business Info Text
+    business_text = []
+    if current_user.business_name:
+        business_text.append(Paragraph(current_user.business_name, style_business_name))
+    
+    address_parts = []
+    if current_user.business_address:
+        # Split address by newlines to handle formatting
+        for line in current_user.business_address.split('\n'):
+            address_parts.append(line)
+    
+    if current_user.tax_id:
+        address_parts.append(f"Tax ID: {current_user.tax_id}")
+    if current_user.website:
+        address_parts.append(current_user.website)
+        
+    for part in address_parts:
+        business_text.append(Paragraph(part, style_normal))
+
+    # Prepare Invoice Details (Right Side)
+    invoice_details = [
+        Paragraph("INVOICE", ParagraphStyle('Title', parent=styles['Heading1'], fontSize=24, textColor=accent_color, alignment=2)),
+        Paragraph(f"#{invoice.invoice_number}", ParagraphStyle('Num', parent=styles['Normal'], fontSize=12, textColor=light_text_color, alignment=2)),
+        Spacer(1, 10),
+        Paragraph("<b>Issue Date:</b> " + invoice.issue_date.strftime('%b %d, %Y'), ParagraphStyle('Date', parent=style_normal, alignment=2)),
+        Paragraph("<b>Due Date:</b> " + invoice.due_date.strftime('%b %d, %Y'), ParagraphStyle('Date', parent=style_normal, alignment=2)),
     ]
-    
-    invoice_info_table = Table(invoice_info, colWidths=[2*inch, 3*inch])
-    invoice_info_table.setStyle(TableStyle([
-        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-        ('FONTNAME', (1, 0), (1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 0), (-1, -1), 10),
-        ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#374151')),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+
+    # Create Header Table
+    header_data = [[business_text, invoice_details]]
+    header_table = Table(header_data, colWidths=[4*inch, 2.5*inch])
+    header_table.setStyle(TableStyle([
+        ('VALIGN', (0,0), (-1,-1), 'TOP'),
+        ('LEFTPADDING', (0,0), (-1,-1), 0),
+        ('RIGHTPADDING', (0,0), (-1,-1), 0),
     ]))
+    elements.append(header_table)
     
-    elements.append(invoice_info_table)
-    elements.append(Spacer(1, 0.3*inch))
+    elements.append(Spacer(1, 0.5*inch))
+
+    # --- BILL TO SECTION ---
+    elements.append(Paragraph("BILL TO", style_header_label))
+    elements.append(Spacer(1, 5))
     
-    # Bill To section
-    elements.append(Paragraph(f"<b>Bill To:</b>", styles['Normal']))
-    elements.append(Spacer(1, 0.1*inch))
-    bill_to_text = f"<b>{client.name}</b><br/>"
-    if client.company:
-        bill_to_text += f"{client.company}<br/>"
-    if client.email:
-        bill_to_text += f"{client.email}"
-    elements.append(Paragraph(bill_to_text, styles['Normal']))
-    elements.append(Spacer(1, 0.4*inch))
-    
-    # Line items table - FIXED COLUMN WIDTHS
-    line_items_data = [
-        ['Description', 'Hours', 'Rate', 'Amount']
+    bill_to_content = [
+        Paragraph(f"<b>{client.name}</b>", style_normal),
     ]
+    if client.company:
+        bill_to_content.append(Paragraph(client.company, style_normal))
+    if client.email:
+        bill_to_content.append(Paragraph(client.email, style_normal))
+    
+    # We wrap it in a table just to give it a background box if we wanted, 
+    # but for now simple stacking is cleaner.
+    for p in bill_to_content:
+        elements.append(p)
+        
+    elements.append(Spacer(1, 0.5*inch))
+
+    # --- LINE ITEMS TABLE ---
+    # Columns: Description, Hours/Qty, Rate, Amount
+    # We use Paragraphs inside cells to allow text wrapping for long descriptions
+    
+    headers = [
+        Paragraph("DESCRIPTION", style_table_header),
+        Paragraph("QTY", ParagraphStyle('QtyHeader', parent=style_table_header, alignment=2)), # Right align
+        Paragraph("RATE", ParagraphStyle('RateHeader', parent=style_table_header, alignment=2)),
+        Paragraph("AMOUNT", ParagraphStyle('AmtHeader', parent=style_table_header, alignment=2))
+    ]
+    
+    data = [headers]
     
     for item in line_items:
-        line_items_data.append([
-            item.description,
-            f"{float(item.quantity):.2f}",
-            f"${float(item.rate):.2f}",
-            f"${float(item.amount):.2f}"
-        ])
+        row = [
+            Paragraph(item.description, style_table_cell), # WRAP TEXT HERE
+            Paragraph(f"{float(item.quantity):.2f}", ParagraphStyle('Qty', parent=style_table_cell, alignment=2)),
+            Paragraph(f"${float(item.rate):.2f}", ParagraphStyle('Rate', parent=style_table_cell, alignment=2)),
+            Paragraph(f"${float(item.amount):.2f}", ParagraphStyle('Amt', parent=style_table_cell, alignment=2))
+        ]
+        data.append(row)
     
-    line_items_table = Table(line_items_data, colWidths=[3*inch, 1.2*inch, 1.15*inch, 1.15*inch])
-    line_items_table.setStyle(TableStyle([
-        # Header row
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e40af')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 11),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('ALIGN', (0, 0), (0, 0), 'LEFT'),  
-        ('ALIGN', (1, 0), (-1, 0), 'RIGHT'),  
+    # Adjust widths: Give Description the most space (3.8 inch), others fixed small
+    col_widths = [3.8*inch, 0.8*inch, 1.0*inch, 1.0*inch]
+    
+    t = Table(data, colWidths=col_widths)
+    t.setStyle(TableStyle([
+        # Header Styling
+        ('BACKGROUND', (0, 0), (-1, 0), accent_color),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+        ('TOPPADDING', (0, 0), (-1, 0), 10),
         
-        # Data rows
-        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 10),
-        ('ALIGN', (1, 1), (-1, -1), 'RIGHT'),  
-        ('ALIGN', (0, 1), (0, -1), 'LEFT'),  
-        ('BOTTOMPADDING', (0, 1), (-1, -1), 8),
-        ('TOPPADDING', (0, 1), (-1, -1), 8),
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),  
-        
-        # Grid
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-        ('LINEBELOW', (0, 0), (-1, 0), 2, colors.HexColor('#1e40af')),
+        # Row Styling
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 10),
+        ('TOPPADDING', (0, 1), (-1, -1), 10),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'), # Align text to top of cell
+        ('GRID', (0, 0), (-1, -1), 0.5, border_color),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f9fafb')]), # Zebra striping
     ]))
     
-    elements.append(line_items_table)
-    elements.append(Spacer(1, 0.3*inch))
+    elements.append(t)
     
-    # Totals table
-    totals_data = [
+    # --- TOTALS SECTION ---
+    # We use a table aligned to the right
+    
+    total_data = [
         ['Subtotal:', f"${float(invoice.subtotal):.2f}"],
-        [f'Tax ({float(invoice.tax_rate * 100):.2f}%):', f"${float(invoice.tax_amount):.2f}"],
-        ['Total:', f"${float(invoice.total):.2f}"],
+        [f'Tax ({float(invoice.tax_rate * 100):.0f}%):', f"${float(invoice.tax_amount):.2f}"],
+        ['Total:', f"${float(invoice.total):.2f}"]
     ]
     
-    totals_table = Table(totals_data, colWidths=[4.5*inch, 2*inch])
+    # Totals Table Logic
+    # 4.6 inch spacer, 1 inch label, 1 inch value (matches column widths above roughly)
+    totals_table = Table(total_data, colWidths=[4.6*inch, 1.0*inch, 1.0*inch])
     totals_table.setStyle(TableStyle([
-        ('FONTNAME', (0, 0), (-1, 1), 'Helvetica'),
-        ('FONTNAME', (0, 2), (-1, 2), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 11),
-        ('ALIGN', (0, 0), (0, -1), 'RIGHT'),
-        ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-        ('TOPPADDING', (0, 0), (-1, -1), 8),
-        ('LINEABOVE', (0, 2), (-1, 2), 2, colors.black),
+        ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),
+        ('FONTNAME', (0, 0), (-1, 1), 'Helvetica'), # Subtotal/Tax font
+        ('FONTNAME', (0, 2), (-1, 2), 'Helvetica-Bold'), # Total font bold
+        ('TEXTCOLOR', (0, 2), (-1, 2), accent_color), # Total color blue
+        ('FONTSIZE', (0, 2), (-1, 2), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        # Remove grid, just show text
+        ('LINEABOVE', (1, 2), (-1, 2), 1, border_color), # Line above Total
     ]))
     
-    elements.append(totals_table)
+    # Because our table structure is [Spacer, Label, Value] to push it right:
+    # We need to reformat data slightly to match the 3 columns
+    formatted_total_data = []
+    for row in total_data:
+        formatted_total_data.append(['', row[0], row[1]])
+        
+    final_totals = Table(formatted_total_data, colWidths=[4.6*inch, 1.0*inch, 1.0*inch])
+    final_totals.setStyle(TableStyle([
+        ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),
+        ('FONTNAME', (0, 0), (-1, 1), 'Helvetica'),
+        ('FONTNAME', (0, 2), (-1, 2), 'Helvetica-Bold'),
+        ('TEXTCOLOR', (0, 2), (-1, 2), accent_color),
+        ('FONTSIZE', (0, 2), (-1, 2), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('LINEABOVE', (1, 2), (-1, 2), 1, border_color),
+    ]))
     
-    # Notes
+    elements.append(final_totals)
+    
+    elements.append(Spacer(1, 0.5*inch))
+
+    # --- FOOTER (Notes & Terms) ---
     if invoice.notes:
-        elements.append(Spacer(1, 0.4*inch))
-        elements.append(Paragraph("<b>Notes:</b>", styles['Normal']))
-        elements.append(Spacer(1, 0.1*inch))
-        elements.append(Paragraph(invoice.notes, styles['Normal']))
-    
-    # Payment terms
+        elements.append(Paragraph("NOTES", style_header_label))
+        elements.append(Spacer(1, 2))
+        elements.append(Paragraph(invoice.notes, style_normal))
+        elements.append(Spacer(1, 10))
+        
     if invoice.payment_terms:
-        elements.append(Spacer(1, 0.3*inch))
-        elements.append(Paragraph(f"<b>Payment Terms:</b> {invoice.payment_terms}", styles['Normal']))
-    
+        elements.append(Paragraph("PAYMENT TERMS", style_header_label))
+        elements.append(Spacer(1, 2))
+        elements.append(Paragraph(invoice.payment_terms, style_normal))
+
     # Build PDF
     doc.build(elements)
     
-    # Get PDF data
+    # Return PDF
     buffer.seek(0)
-    
-    # Return as downloadable file
-    filename = f"invoice-{invoice.invoice_number}.pdf"
+    filename = f"Invoice-{invoice.invoice_number}.pdf"
     
     return StreamingResponse(
         buffer,
