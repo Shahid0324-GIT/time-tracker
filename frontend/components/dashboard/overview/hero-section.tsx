@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { formatDurationTime } from "@/lib/utils/format";
 import { useTimerStore } from "@/lib/stores/timerStore";
+import { useGreeting } from "@/lib/hooks/use-greetings";
 
 export function HeroSection() {
   const {
@@ -38,6 +39,7 @@ export function HeroSection() {
   const { projects, isLoading: isLoadingProjects } = useProjects();
   const { user } = useAuthStore();
   const { elapsedSeconds } = useTimerStore();
+  const greetings = useGreeting();
 
   // State for the new description field
   const [selectedProject, setSelectedProject] = useState<string>("");
@@ -51,7 +53,7 @@ export function HeroSection() {
       <Card className="border-l-4 border-l-primary shadow-sm h-45 flex flex-col justify-center">
         <CardHeader>
           <CardTitle className="text-xl">
-            Good Morning, {user?.first_name || "Creator"}
+            {greetings}, {user?.first_name || "Creator"}
           </CardTitle>
           <CardDescription>Checking your active sessions...</CardDescription>
         </CardHeader>
@@ -141,7 +143,7 @@ export function HeroSection() {
     <Card className="border-l-4 my-4 sm:my-2 border-l-primary shadow-sm transition-all duration-500 ease-in-out">
       <CardHeader>
         <CardTitle className="text-xl">
-          Good Morning, {user?.first_name || "Creator"}
+          {greetings}, {user?.first_name || "Creator"}
         </CardTitle>
         <CardDescription>
           Ready to track your work today? {format(new Date(), "EEEE, MMMM do")}
