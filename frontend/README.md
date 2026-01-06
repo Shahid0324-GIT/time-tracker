@@ -155,14 +155,6 @@ Full dark mode support using `next-themes`:
 - Manual toggle
 - Persistent across sessions
 
-## 🧪 Testing
-
-```bash
-npm test
-npm run test:watch
-npm run test:coverage
-```
-
 ## 🏗️ Building
 
 ```bash
@@ -186,10 +178,6 @@ npm start
 
 ## 🎨 Styling
 
-### Tailwind Configuration
-
-Custom theme colors and utilities in `tailwind.config.ts`
-
 ### Component Library
 
 Using shadcn/ui for:
@@ -209,7 +197,6 @@ npm run dev          # Development server
 npm run build        # Production build
 npm run start        # Production server
 npm run lint         # ESLint
-npm run type-check   # TypeScript check
 ```
 
 ## 🔧 Configuration
