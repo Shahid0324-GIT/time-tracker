@@ -5,6 +5,7 @@ from db import get_session
 from auth import get_current_user
 from models import User
 from api_types import UserResponse, UserUpdate
+from config import TEST_ACCOUNT
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -47,7 +48,7 @@ def delete_my_account(
     Permanently delete the authenticated user and all associated data.
     """
     
-    if current_user.email == "janedoe@example.com":
+    if current_user.email == TEST_ACCOUNT:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
             detail="Cannot delete test account"

@@ -37,6 +37,7 @@ GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID")
 GITHUB_CLIENT_SECRET = os.getenv("GITHUB_CLIENT_SECRET")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+TEST_ACCOUNT = os.getenv("TEST_ACCOUNT", "janedoe@example.com")
 
 # Validate OAuth credentials
 if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
