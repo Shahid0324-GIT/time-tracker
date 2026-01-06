@@ -227,7 +227,4 @@ npm run lint         # ESLint
 
 MIT License
 
-```
-
 ---
-```
