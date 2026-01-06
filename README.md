@@ -173,7 +173,7 @@ MIT License - feel free to use this project for learning or your own purposes.
 **Mohammed Jameel Shahid**
 
 - LinkedIn: [linkedin.com/in/mohammed-shahid1](https://www.linkedin.com/in/mohammed-shahid1/)
-- GitHub: [@yShahid0324-GIT](https://github.com/Shahid0324-GIT)
+- GitHub: [@Shahid0324-GIT](https://github.com/Shahid0324-GIT)
 
 ## 🙏 Acknowledgments
 
