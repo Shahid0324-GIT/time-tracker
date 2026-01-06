@@ -18,6 +18,42 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Time Tracker - Track your time, invoice your clients",
   description: "Professional time tracking and invoicing application",
+  generator: "v0.app",
+  openGraph: {
+    title: "Time Tracker - Track your time, invoice your clients",
+    description: "Professional time tracking and invoicing application",
+    images: [
+      {
+        url: "https://ogcdn.net/904e879f-a9bb-4c56-9362-06e6c8fe3ac6/v2/Time%20Tracker/Roboto%20Mono/rgb(253%2C%20251%2C%20251)/Track%20your%20time%2C%20invoice%20your%20clients/Roboto%20Mono/rgb(245%2C%20232%2C%20232)/https%3A%2F%2Fopengraph.b-cdn.net%2Fproduction%2Fimages%2F29ce311e-29ea-423f-bd6b-549a0b579d48.png%3Ftoken%3DJKY6sp9HhymJ-gAoaExksAIMREyGsHiJdLoZGFNV0jc%26height%3D507%26width%3D1200%26expires%3D33303710124/https%3A%2F%2Fopengraph.b-cdn.net%2Fproduction%2Fimages%2Fad6c83cc-8726-461d-9cf0-398dc677cd74.png%3Ftoken%3DVn4R03VL_Lq4TH_6E9uBMOFrBLjwDDbZHulFjCmRhew%26height%3D350%26width%3D350%26expires%3D33303710252//Roboto%20Mono/rgba(0%2C0%2C0%2C1)//Roboto%20Mono/rgba(255%2C255%2C255%2C%201)/rgba(0%2C0%2C0%2C1)/og.png",
+        width: 1200,
+        height: 630,
+        alt: "Time Tracker - Professional time tracking and invoicing",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Time Tracker - Track your time, invoice your clients",
+    description: "Professional time tracking and invoicing application",
+  },
+  icons: {
+    icon: [
+      {
+        url: "/favicon-32x32.png",
+        media: "(prefers-color-scheme: light)",
+      },
+      {
+        url: "/favicon-32x32.png",
+        media: "(prefers-color-scheme: dark)",
+      },
+      {
+        url: "/logo.svg",
+        type: "image/svg+xml",
+      },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({
