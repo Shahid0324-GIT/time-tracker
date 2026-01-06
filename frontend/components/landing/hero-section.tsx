@@ -9,15 +9,18 @@ import { motion } from "framer-motion";
 import BlurText from "@/components/ui/react-bits/BlurText";
 import TiltedCard from "@/components/ui/react-bits/TiltedCard";
 import LightRays from "@/components/ui/react-bits/LightRays";
+import { useTheme } from "next-themes";
 
 export function HeroSection() {
+  const { theme } = useTheme();
+
   return (
     <section className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden pt-32 pb-24 md:pt-40 md:pb-32">
       {/* 1. BACKGROUND: Dual Light Rays */}
       <div className="absolute inset-0 z-0">
         <LightRays
           raysOrigin="top-center"
-          raysColor="#c084fc20"
+          raysColor={theme === "dark" ? "#0d9488" : "#00000020"}
           raysSpeed={1.5}
           lightSpread={1}
           rayLength={2}
@@ -116,38 +119,25 @@ export function HeroSection() {
           initial={{ opacity: 0, scale: 0.9, y: 50 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 1, delay: 1.2, ease: "easeOut" }}
-          className="relative mt-20 md:mt-32 w-full flex justify-center px-4 md:px-0"
+          className="relative mt-20 md:mt-32 flex justify-center px-4 md:px-0"
         >
-          <div className="relative z-20 w-full max-w-225 aspect-video">
+          <div className="relative z-20 min-h-dvh aspect-video">
             <TiltedCard
-              imageSrc="/landing/hero-timer.png"
+              imageSrc={
+                theme === "dark"
+                  ? "/landing/landing-dark.png"
+                  : "/landing/landing-light.png"
+              }
               altText="FreelanceFlow Timer Interface"
               captionText="Live Activity Tracking"
               containerHeight="100%"
               containerWidth="100%"
               imageHeight="100%"
               imageWidth="100%"
-              rotateAmplitude={12}
+              rotateAmplitude={1}
               scaleOnHover={1.05}
               showMobileWarning={false}
               showTooltip={true}
-              displayOverlayContent={true}
-              overlayContent={
-                <div className="absolute hidden md:block bottom-4 left-4 md:bottom-8 md:left-8 p-3 md:p-5 bg-white/80 dark:bg-black/80 backdrop-blur-xl rounded-2xl border border-cyan-200 dark:border-cyan-500/30 text-black dark:text-white shadow-2xl shadow-cyan-200/20 dark:shadow-cyan-500/20">
-                  <div className="flex items-center gap-2 md:gap-3 mb-1 md:mb-2">
-                    <span className="flex h-2 w-2 md:h-3 md:w-3 rounded-full bg-green-600 dark:bg-green-500 animate-pulse shadow-lg shadow-green-600/50 dark:shadow-green-500/50"></span>
-                    <p className="font-bold text-sm md:text-xl">
-                      Active Session
-                    </p>
-                  </div>
-                  <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300 font-medium">
-                    Jarvis UI Update •{" "}
-                    <span className="text-cyan-600 dark:text-cyan-400">
-                      01:23:45
-                    </span>
-                  </p>
-                </div>
-              }
             />
           </div>
 

@@ -9,7 +9,7 @@ export function BentoGrid() {
   return (
     <section
       id="details"
-      className="py-32 dark:bg-black relative overflow-hidden scroll-mt-28"
+      className="py-32 relative overflow-hidden scroll-mt-28"
     >
       {/* Background Gradient Blob */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-125 h-125 bg-cyan-100/50 dark:bg-blue-500/10 rounded-full blur-[120px] -z-10" />

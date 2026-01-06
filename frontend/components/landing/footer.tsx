@@ -1,4 +1,8 @@
 export function Footer() {
+  const date = `${String(new Date().getDate()).padStart(2, "0")}-${String(
+    new Date().getMonth() + 1
+  ).padStart(2, "0")}-${new Date().getFullYear()}`;
+
   return (
     <footer className="py-12 border-t border-gray-200 dark:border-white/10 relative overflow-hidden">
       <div className="container px-4 md:px-6 mx-auto flex flex-col items-center justify-between h-full">
@@ -18,12 +22,12 @@ export function Footer() {
               GitHub
             </a>
           </div>
-          <p>© Time Tracker</p>
+          <p>&copy; {date} Time Tracker. All rights reserved.</p>
         </div>
 
         {/* THE BIG TEXT */}
         <div className="w-full text-center">
-          <h1 className="text-[12vw] md:text-[14vw] font-black leading-none tracking-tighter text-black/5 dark:text-white/5 select-none hover:text-black/60 dark:hover:text-white/60 transition-colors duration-500">
+          <h1 className="text-[12vw] md:text-[14vw] font-black leading-none tracking-tighter text-black/5 dark:text-white/10 select-none hover:text-black/60 dark:hover:text-white/70 transition-colors duration-500">
             TIME TRACKER
           </h1>
         </div>
