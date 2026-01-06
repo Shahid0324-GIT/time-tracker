@@ -48,16 +48,12 @@ export function LandingNavbar() {
           width: isScrolled ? "auto" : "100%",
           maxWidth: isScrolled ? "800px" : "1280px",
           borderRadius: isScrolled ? "9999px" : "0px",
-          backgroundColor: isScrolled
-            ? "rgba(0, 0, 0, 0.6)"
-            : "rgba(0, 0, 0, 0)",
-          borderColor: isScrolled ? "rgba(255, 255, 255, 0.1)" : "transparent",
         }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
         className={`pointer-events-auto flex items-center justify-between px-6 py-3 backdrop-blur-md transition-all duration-300 ${
           isScrolled
-            ? "shadow-[0_0_20px_rgba(34,211,238,0.1)] border border-white/10"
-            : ""
+            ? "bg-black/60 dark:bg-black/60 border border-white/10 dark:border-white/10 shadow-[0_0_20px_rgba(34,211,238,0.1)]"
+            : "bg-transparent"
         }`}
       >
         {/* LOGO */}
@@ -72,7 +68,7 @@ export function LandingNavbar() {
             />
           </div>
           <span
-            className={`font-bold text-lg tracking-tight text-white ${
+            className={`font-bold text-lg tracking-tight text-white dark:text-white ${
               isScrolled ? "hidden md:block" : "block"
             }`}
           >
@@ -87,7 +83,7 @@ export function LandingNavbar() {
               key={link.name}
               href={link.href}
               onClick={(e) => handleScroll(e, link.href)}
-              className="text-sm font-medium text-gray-400 hover:text-white transition-colors hover:shadow-[0_0_20px_rgba(168,85,247,0.5)] hover:shadow-purple-500/20 cursor-pointer"
+              className="text-sm font-medium dark:text-gray-400 hover:text-gray-700 dark:hover:text-white transition-colors hover:shadow-[0_0_20px_rgba(168,85,247,0.5)] cursor-pointer"
             >
               {link.name}
             </a>
@@ -112,7 +108,7 @@ export function LandingNavbar() {
                 <>
                   <Link
                     href="/login"
-                    className="hidden sm:block text-sm font-medium text-gray-300 hover:text-white transition-colors"
+                    className="hidden sm:block text-sm font-medium text-gray-300 dark:text-gray-300 hover:text-white dark:hover:text-white transition-colors"
                   >
                     Log in
                   </Link>
@@ -122,7 +118,7 @@ export function LandingNavbar() {
                       className={`rounded-full font-semibold transition-all ${
                         isScrolled
                           ? "bg-linear-to-r from-cyan-500 to-purple-600 hover:scale-105 shadow-lg shadow-purple-500/20 text-white border-0"
-                          : "bg-white text-black hover:bg-gray-200"
+                          : "bg-white dark:bg-white text-black dark:text-black hover:bg-gray-200 dark:hover:bg-gray-200"
                       }`}
                     >
                       Get Started
@@ -140,7 +136,7 @@ export function LandingNavbar() {
 
         {/* GRADIENT BORDER (Visible only when scrolled) */}
         {isScrolled && (
-          <div className="absolute inset-0 rounded-full p-px -z-10 bg-linear-to-r from-cyan-500/50 via-purple-500/50 to-cyan-500/50 mask-gradient" />
+          <div className="absolute inset-0 rounded-full p-px -z-10 bg-linear-to-r from-cyan-500/50 via-purple-500/50 to-cyan-500/50" />
         )}
       </motion.nav>
     </div>

@@ -8,7 +8,7 @@ import HorizontalFeatures from "@/components/landing/horizontal-features";
 
 export default function LandingPage() {
   return (
-    <div className="flex flex-col items-center w-full bg-black overflow-x-clip">
+    <div className="flex flex-col items-center w-full overflow-x-clip">
       {/* 1. Hero: The Hook */}
       <HeroSection />
 

@@ -34,7 +34,7 @@ export default function FeatureSlide({
   return (
     <section
       id="features"
-      className="w-screen h-screen shrink-0 flex items-center justify-center px-6 md:px-12 lg:px-20 relative overflow-hidden bg-black scroll-mt-28"
+      className="w-screen h-screen shrink-0 flex items-center justify-center px-6 md:px-12 lg:px-20 relative overflow-hidden scroll-mt-28"
     >
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center w-full max-w-450 z-10 relative">
         {/* Text Side */}
@@ -48,14 +48,14 @@ export default function FeatureSlide({
             0{feature.id}
           </div>
           <div className="space-y-6">
-            <h2 className="text-5xl md:text-7xl font-bold text-white tracking-tighter">
+            <h2 className="text-5xl md:text-7xl font-bold text-black dark:text-white tracking-tighter">
               {feature.title}
             </h2>
-            <p className="text-xl text-zinc-400 leading-relaxed max-w-lg">
+            <p className="text-xl text-gray-600 dark:text-zinc-400 leading-relaxed max-w-lg">
               {feature.description}
             </p>
           </div>
-          <button className="flex items-center text-white/80 group cursor-pointer w-fit py-2">
+          <button className="flex items-center text-black/80 dark:text-white/80 group cursor-pointer w-fit py-2">
             <Link href="/register" className="font-medium text-lg">
               Get Started
             </Link>
@@ -69,7 +69,7 @@ export default function FeatureSlide({
             className={`absolute -inset-10 bg-linear-to-r ${feature.color} blur-[120px] opacity-10 group-hover:opacity-25 transition-opacity duration-700`}
           />
 
-          <div className="relative rounded-3xl border border-white/10 bg-zinc-900/50 backdrop-blur-2xl overflow-hidden shadow-2xl aspect-16/10">
+          <div className="relative rounded-3xl border border-gray-200 dark:border-white/10 bg-gray-100/50 dark:bg-zinc-900/50 backdrop-blur-2xl overflow-hidden shadow-2xl aspect-16/10">
             <motion.div
               className="absolute inset-0 w-full h-full cursor-zoom-in"
               style={{ x: parallaxX, scale: 1.1 }}

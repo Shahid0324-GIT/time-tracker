@@ -12,12 +12,12 @@ import LightRays from "@/components/ui/react-bits/LightRays";
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden pt-32 pb-24 md:pt-40 md:pb-32 bg-black">
+    <section className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden pt-32 pb-24 md:pt-40 md:pb-32">
       {/* 1. BACKGROUND: Dual Light Rays */}
       <div className="absolute inset-0 z-0">
         <LightRays
           raysOrigin="top-center"
-          raysColor="#8b5cf6"
+          raysColor="#c084fc20"
           raysSpeed={1.5}
           lightSpread={1}
           rayLength={2}
@@ -28,7 +28,8 @@ export function HeroSection() {
           className="custom-rays"
           fadeDistance={2}
         />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,black_100%)] pointer-events-none" />
+
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,white_100%)] dark:bg-[radial-gradient(circle_at_center,transparent_0%,black_100%)] pointer-events-none" />
       </div>
 
       {/* 2. MAIN CONTENT */}
@@ -38,9 +39,9 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="inline-flex items-center rounded-full border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-sm text-cyan-300 backdrop-blur-xl shadow-lg shadow-cyan-500/20"
+          className="inline-flex items-center rounded-full border border-cyan-200 dark:border-cyan-500/30 bg-cyan-100 dark:bg-cyan-500/10 px-4 py-2 text-sm text-cyan-600 dark:text-cyan-300 backdrop-blur-xl shadow-lg shadow-cyan-200/50 dark:shadow-cyan-500/20"
         >
-          <span className="flex h-2 w-2 rounded-full bg-cyan-400 mr-2 animate-pulse shadow-lg shadow-cyan-400/50"></span>
+          <span className="flex h-2 w-2 rounded-full bg-cyan-600 dark:bg-cyan-400 mr-2 animate-pulse shadow-lg shadow-cyan-600/50 dark:shadow-cyan-400/50"></span>
           <span className="font-semibold">v1.0 Now Live</span>
         </motion.div>
 
@@ -48,7 +49,7 @@ export function HeroSection() {
         <div className="space-y-0 leading-none">
           <BlurText
             text="TIME IS"
-            className="text-6xl md:text-[10rem] font-black tracking-tighter text-cyan-400 drop-shadow-[0_0_30px_rgba(34,211,238,0.3)]"
+            className="text-6xl md:text-[10rem] font-black tracking-tighter text-cyan-600 dark:text-cyan-400 drop-shadow-[0_0_30px_rgba(34,211,238,0.3)]"
             delay={50}
             animateBy="letters"
             direction="top"
@@ -56,7 +57,7 @@ export function HeroSection() {
           <div className="h-2 md:h-8" />
           <BlurText
             text="MONEY."
-            className="text-6xl md:text-[10rem] font-black tracking-tighter text-purple-500 drop-shadow-[0_0_30px_rgba(168,85,247,0.3)]"
+            className="text-6xl md:text-[10rem] font-black tracking-tighter text-purple-600 dark:text-purple-500 drop-shadow-[0_0_30px_rgba(168,85,247,0.3)]"
             delay={50}
             animateBy="letters"
             direction="bottom"
@@ -68,13 +69,19 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.8 }}
-          className="text-lg md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed font-light pt-6"
+          className="text-lg md:text-2xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed font-light pt-6"
         >
-          The <span className="text-white font-semibold">operating system</span>{" "}
+          The{" "}
+          <span className="text-black dark:text-white font-semibold">
+            operating system
+          </span>{" "}
           for high-performance freelancers.
           <br className="hidden md:block" />
           Track time, invoice clients, and analyze profit{" "}
-          <span className="text-cyan-400">without the chaos</span>.
+          <span className="text-cyan-600 dark:text-cyan-400">
+            without the chaos
+          </span>
+          .
         </motion.p>
 
         {/* BUTTONS */}
@@ -87,7 +94,7 @@ export function HeroSection() {
           <Link href="/register" className="w-full sm:w-auto">
             <Button
               size="lg"
-              className="w-full sm:w-auto h-14 px-10 text-lg rounded-full bg-linear-to-r from-cyan-500 to-purple-600 text-white hover:from-cyan-400 hover:to-purple-500 transition-all hover:scale-105 shadow-lg shadow-cyan-500/30 font-semibold border-0"
+              className="w-full sm:w-auto h-14 px-10 text-lg rounded-full bg-linear-to-r from-cyan-700 to-purple-800 dark:from-cyan-500 dark:to-purple-600 text-white hover:from-cyan-600 hover:to-purple-700 dark:hover:from-cyan-400 dark:hover:to-purple-500 transition-all hover:scale-105 shadow-lg shadow-cyan-300/30 dark:shadow-cyan-500/30 font-semibold border-0"
             >
               Start for Free
             </Button>
@@ -96,7 +103,7 @@ export function HeroSection() {
             <Button
               variant="ghost"
               size="lg"
-              className="w-full sm:w-auto h-14 px-8 rounded-full text-lg group text-gray-300 hover:text-white border border-white/10 hover:border-white/30 hover:bg-white/5 transition-all"
+              className="w-full sm:w-auto h-14 px-8 rounded-full text-lg group text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white border border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/30 hover:bg-gray-100 dark:hover:bg-white/5 transition-all"
             >
               Login{" "}
               <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
@@ -126,16 +133,18 @@ export function HeroSection() {
               showTooltip={true}
               displayOverlayContent={true}
               overlayContent={
-                <div className="absolute hidden md:block bottom-4 left-4 md:bottom-8 md:left-8 p-3 md:p-5 bg-black/80 backdrop-blur-xl rounded-2xl border border-cyan-500/30 text-white shadow-2xl shadow-cyan-500/20">
+                <div className="absolute hidden md:block bottom-4 left-4 md:bottom-8 md:left-8 p-3 md:p-5 bg-white/80 dark:bg-black/80 backdrop-blur-xl rounded-2xl border border-cyan-200 dark:border-cyan-500/30 text-black dark:text-white shadow-2xl shadow-cyan-200/20 dark:shadow-cyan-500/20">
                   <div className="flex items-center gap-2 md:gap-3 mb-1 md:mb-2">
-                    <span className="flex h-2 w-2 md:h-3 md:w-3 rounded-full bg-green-500 animate-pulse shadow-lg shadow-green-500/50"></span>
+                    <span className="flex h-2 w-2 md:h-3 md:w-3 rounded-full bg-green-600 dark:bg-green-500 animate-pulse shadow-lg shadow-green-600/50 dark:shadow-green-500/50"></span>
                     <p className="font-bold text-sm md:text-xl">
                       Active Session
                     </p>
                   </div>
-                  <p className="text-xs md:text-sm text-gray-300 font-medium">
+                  <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300 font-medium">
                     Jarvis UI Update •{" "}
-                    <span className="text-cyan-400">01:23:45</span>
+                    <span className="text-cyan-600 dark:text-cyan-400">
+                      01:23:45
+                    </span>
                   </p>
                 </div>
               }
@@ -143,11 +152,11 @@ export function HeroSection() {
           </div>
 
           {/* Glow Effect */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[80%] bg-linear-to-r from-cyan-500/20 via-purple-500/20 to-pink-500/20 rounded-full blur-[80px] md:blur-[120px] -z-10 pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[80%] bg-linear-to-r from-cyan-300/20 via-purple-300/20 to-pink-300/20 dark:from-cyan-500/20 dark:via-purple-500/20 dark:to-pink-500/20 rounded-full blur-[80px] md:blur-[120px] -z-10 pointer-events-none" />
         </motion.div>
       </div>
 
-      <div className="absolute bottom-0 left-0 w-full h-32 bg-linear-to-t from-black to-transparent pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-full h-32 bg-linear-to-t from-white to-transparent dark:from-black pointer-events-none" />
     </section>
   );
 }

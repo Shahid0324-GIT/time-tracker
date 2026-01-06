@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { SmoothScroll } from "@/components/landing/smooth-scroll";
 import "@/app/globals.css";
 import { LandingNavbar } from "@/components/landing/landing-navbar";
+import { ThemeProvider } from "next-themes";
 
 export const metadata: Metadata = {
   title: "FreelanceFlow - Master Your Time",
@@ -14,9 +15,13 @@ export default function LandingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SmoothScroll>
-      <LandingNavbar />
-      <main className="relative min-h-screen w-full">{children}</main>
-    </SmoothScroll>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <SmoothScroll>
+        <LandingNavbar />
+        <main className="relative min-h-screen w-full  bg-gray-50 dark:bg-black">
+          {children}
+        </main>
+      </SmoothScroll>
+    </ThemeProvider>
   );
 }
