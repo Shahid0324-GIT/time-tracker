@@ -17,7 +17,7 @@ export function BentoGrid() {
       <div className="container px-4 md:px-6 mx-auto max-w-7xl">
         {/* Section Header with BlurText */}
         <div className="text-center mb-20 space-y-4 flex flex-col items-center">
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tighter text-gray-900 dark:text-white flex flex-col items-center gap-2">
+          <h2 className="text-3xl md:text-8xl font-bold tracking-tighter text-gray-900 dark:text-white flex flex-col items-center gap-2">
             <BlurText
               text="Everything you need"
               className="text-gray-900 dark:text-white"

@@ -15,10 +15,10 @@ export default function LandingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="dark">
       <SmoothScroll>
         <LandingNavbar />
-        <main className="relative min-h-screen w-full  bg-gray-50 dark:bg-gray-800 transition-colors duration-500">
+        <main className="relative min-h-screen w-fullbg-white dark:bg-gray-900 transition-colors duration-500">
           {children}
         </main>
       </SmoothScroll>

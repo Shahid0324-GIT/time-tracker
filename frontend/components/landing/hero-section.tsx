@@ -22,7 +22,7 @@ export function HeroSection() {
       <div className="absolute inset-0 z-0">
         <LightRays
           raysOrigin="top-center"
-          raysColor={theme === "dark" ? "#0d9488" : "#00000020"}
+          raysColor={theme === "dark" ? "#0d9488" : "#E0E0E0"}
           raysSpeed={1.5}
           lightSpread={1}
           rayLength={2}
@@ -54,7 +54,7 @@ export function HeroSection() {
         <div className="space-y-0 leading-none">
           <BlurText
             text="TIME IS"
-            className="text-6xl md:text-[10rem] font-black tracking-tighter text-cyan-600 dark:text-cyan-400 drop-shadow-[0_0_30px_rgba(34,211,238,0.3)]"
+            className="text-6xl md:text-[10rem] font-black tracking-tighter text-cyan-700 dark:text-cyan-400 drop-shadow-[0_0_30px_rgba(34,211,238,0.3)]"
             delay={50}
             animateBy="letters"
             direction="top"
@@ -62,7 +62,7 @@ export function HeroSection() {
           <div className="h-2 md:h-8" />
           <BlurText
             text="MONEY."
-            className="text-6xl md:text-[10rem] font-black tracking-tighter text-purple-600 dark:text-purple-500 drop-shadow-[0_0_30px_rgba(168,85,247,0.3)]"
+            className="text-6xl md:text-[10rem] font-black tracking-tighter text-purple-700 dark:text-purple-500 drop-shadow-[0_0_30px_rgba(168,85,247,0.3)]"
             delay={50}
             animateBy="letters"
             direction="bottom"

@@ -70,8 +70,8 @@ export function CTASection() {
         </h2>
 
         <p className="text-xl text-gray-600 dark:text-gray-400 max-w-lg mx-auto">
-          Join thousands of high-performance freelancers who have stopped
-          guessing and started tracking.
+          Take control of your freelance finances with smart tracking and
+          insights.
         </p>
 
         <motion.div

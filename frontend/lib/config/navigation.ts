@@ -6,7 +6,7 @@ import {
   Receipt,
   BarChart3,
   Settings,
-  HelpCircle,
+  // HelpCircle,
 } from "lucide-react";
 
 export const NAV_ITEMS = [
@@ -58,9 +58,9 @@ export const SECONDARY_NAV_ITEMS = [
     url: "/dashboard/settings",
     icon: Settings,
   },
-  {
-    title: "Help",
-    url: "/dashboard/help",
-    icon: HelpCircle,
-  },
+  // {
+  //   title: "Help",
+  //   url: "/dashboard/help",
+  //   icon: HelpCircle,
+  // },
 ];
