@@ -10,9 +10,11 @@ import BlurText from "@/components/ui/react-bits/BlurText";
 import TiltedCard from "@/components/ui/react-bits/TiltedCard";
 import LightRays from "@/components/ui/react-bits/LightRays";
 import { useTheme } from "next-themes";
+import { useIsMobile } from "@/lib/hooks/use-mobile";
 
 export function HeroSection() {
   const { theme } = useTheme();
+  const isMobile = useIsMobile();
 
   return (
     <section className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden pt-32 pb-24 md:pt-40 md:pb-32">
@@ -121,23 +123,23 @@ export function HeroSection() {
           transition={{ duration: 1, delay: 1.2, ease: "easeOut" }}
           className="relative mt-20 md:mt-32 flex justify-center px-4 md:px-0"
         >
-          <div className="relative z-20 min-h-dvh aspect-video">
+          <div
+            className={`relative z-20 ${
+              isMobile ? "w-72 h-48" : "min-h-dvh min-w-full aspect-video"
+            }`}
+          >
             <TiltedCard
-              imageSrc={
-                theme === "dark"
-                  ? "/landing/landing-dark.png"
-                  : "/landing/landing-light.png"
-              }
+              imageSrc={"/landing/landing-light.png"}
               altText="FreelanceFlow Timer Interface"
               captionText="Live Activity Tracking"
-              containerHeight="100%"
               containerWidth="100%"
-              imageHeight="100%"
+              containerHeight="100%"
               imageWidth="100%"
-              rotateAmplitude={1}
-              scaleOnHover={1.05}
+              imageHeight="100%"
+              rotateAmplitude={isMobile ? 0 : 1}
+              scaleOnHover={isMobile ? 1 : 1.05}
               showMobileWarning={false}
-              showTooltip={true}
+              showTooltip={!isMobile}
             />
           </div>
 

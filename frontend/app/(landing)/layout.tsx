@@ -15,7 +15,7 @@ export default function LandingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system">
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <SmoothScroll>
         <LandingNavbar />
         <main className="relative min-h-screen w-full  bg-gray-50 dark:bg-gray-800 transition-colors duration-500">
