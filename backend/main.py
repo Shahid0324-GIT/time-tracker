@@ -58,6 +58,7 @@ app.add_middleware(
         FRONTEND_URL,
         "http://localhost:3000",
         "http://localhost:5173",  # Vite default
+        "https://time-tracker-five-lilac.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
