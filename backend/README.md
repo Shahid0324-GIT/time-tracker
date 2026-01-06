@@ -233,20 +233,6 @@ SECRET_KEY=<production-secret>
 FRONTEND_URL=https://your-app.vercel.app
 ```
 
-## 📝 Code Style
-
-- **Black** for formatting
-- **isort** for import sorting
-- **flake8** for linting
-- **mypy** for type checking
-
-```bash
-black .
-isort .
-flake8 .
-mypy .
-```
-
 ## 🤝 Contributing
 
 1. Fork the repository
