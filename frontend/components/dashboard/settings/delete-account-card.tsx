@@ -29,10 +29,20 @@ import { Route } from "next";
 
 export function DeleteAccountCard() {
   const router = useRouter();
-  const { logout } = useAuthStore();
+  const { logout, user } = useAuthStore();
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
+    if (!user) {
+      toast.error("No user is logged in.");
+      return;
+    }
+
+    if (user.email === "janedoe@example.com") {
+      toast.error("Demo account cannot be deleted.");
+      return;
+    }
+
     setIsDeleting(true);
     try {
       await authApi.deleteAccount();
@@ -95,7 +105,7 @@ export function DeleteAccountCard() {
                   handleDelete();
                 }}
                 className="bg-red-600 hover:bg-red-700 text-white"
-                disabled={isDeleting}
+                disabled={isDeleting || user?.email === "janedoe@example.com"}
               >
                 {isDeleting ? "Deleting..." : "Yes, delete my account"}
               </AlertDialogAction>

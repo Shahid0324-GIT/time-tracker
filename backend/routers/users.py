@@ -46,6 +46,13 @@ def delete_my_account(
     """
     Permanently delete the authenticated user and all associated data.
     """
+    
+    if current_user.email == "janedoe@example.com":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Cannot delete test account"
+        )
+    
     try:
         session.delete(current_user)
         session.commit()
