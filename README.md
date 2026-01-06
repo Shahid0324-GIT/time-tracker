@@ -43,7 +43,7 @@
 
 ## 🚀 Live Demo
 
-**Try it now:** [https://your-app.vercel.app](https://time-tracker-five-lilac.vercel.app/)
+**Try it now:** [https://time-tracker-five-lilac.vercel.app](https://time-tracker-five-lilac.vercel.app)
 
 **Test Credentials:**
 
