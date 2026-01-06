@@ -218,7 +218,7 @@ PATCH  /invoices/{id}/status/{status} # Update status
 
 ## 🚀 Deployment
 
-### Railway
+### Render
 
 1. Create new project
 2. Connect GitHub repo
