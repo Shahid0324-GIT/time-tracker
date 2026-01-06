@@ -43,16 +43,16 @@
 
 ## 🚀 Live Demo
 
-**Try it now:** [https://your-app.vercel.app](https://your-app.vercel.app)
+**Try it now:** [[https://your-app.vercel.app](https://time-tracker-five-lilac.vercel.app/)]([https://your-app.vercel.app](https://time-tracker-five-lilac.vercel.app/))
 
 **Test Credentials:**
 
 ```
-Email: demo@example.com
-Password: demo123
+Email: janedoe@example.com
+Password: janedoe123
 ```
 
-**API Documentation:** [https://your-railway-app.railway.app/docs](https://your-railway-app.railway.app/docs)
+**API Documentation:** [https://time-tracker-wm1y.onrender.com/docs](https://time-tracker-wm1y.onrender.com/docs)
 
 ## 📸 Screenshots
 
