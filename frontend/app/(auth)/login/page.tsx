@@ -42,7 +42,7 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "janedoe@example.com",
-      password: "jandoe123",
+      password: "janedoe123",
     },
   });
 
