@@ -37,7 +37,6 @@ export function DeleteAccountCard() {
       toast.error("No user is logged in.");
       return;
     }
-
     if (user.email === "janedoe@example.com") {
       toast.error("Demo account cannot be deleted.");
       return;
