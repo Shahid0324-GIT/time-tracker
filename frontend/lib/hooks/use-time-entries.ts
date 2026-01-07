@@ -23,7 +23,7 @@ export function useTimeEntries(filters?: TimeEntryFilters) {
     mutationFn: timeApi.create,
     onSuccess: () => {
       toast.success("Time entry added successfully");
-      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: ["time-entries"] });
     },
     onError: (error: AxiosError<ApiError>) => {
       toast.error(error.response?.data?.detail || "Failed to create entry");
@@ -35,7 +35,7 @@ export function useTimeEntries(filters?: TimeEntryFilters) {
     mutationFn: timeApi.update,
     onSuccess: () => {
       toast.success("Entry updated successfully");
-      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: ["time-entries"] });
     },
     onError: (error: AxiosError<ApiError>) => {
       toast.error(error.response?.data?.detail || "Failed to update entry");
@@ -47,7 +47,7 @@ export function useTimeEntries(filters?: TimeEntryFilters) {
     mutationFn: timeApi.delete,
     onSuccess: () => {
       toast.success("Entry deleted");
-      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: ["time-entries"] });
     },
     onError: (error: AxiosError<ApiError>) => {
       toast.error(error.response?.data?.detail || "Failed to delete entry");

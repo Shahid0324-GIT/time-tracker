@@ -37,7 +37,7 @@ import { TimeEntryWithProject } from "@/lib/types";
 
 interface ManualEntryFormProps {
   onSuccess?: () => void;
-  entryToEdit?: TimeEntryWithProject; // New prop
+  entryToEdit?: TimeEntryWithProject;
 }
 
 export function ManualEntryForm({
@@ -48,12 +48,11 @@ export function ManualEntryForm({
   const { projects, isLoading: isLoadingProjects } = useProjects();
   const activeProjects = projects?.filter((p) => p.is_active) || [];
 
-  // Determine default values based on entryToEdit
   const defaultValues: Partial<TimeEntryFormValues> = entryToEdit
     ? {
         project_id: entryToEdit.project_id,
         description: entryToEdit.description || "",
-        date: new Date(entryToEdit.start_time),
+        date: new Date(entryToEdit.start_time), // Auto-converts UTC -> Local
         start_time: format(new Date(entryToEdit.start_time), "HH:mm"),
         end_time: entryToEdit.end_time
           ? format(new Date(entryToEdit.end_time), "HH:mm")
@@ -74,7 +73,6 @@ export function ManualEntryForm({
     defaultValues: defaultValues as TimeEntryFormValues,
   });
 
-  // Reset form if entryToEdit changes (e.g. opening different items in modal)
   useEffect(() => {
     if (entryToEdit) {
       form.reset({
@@ -91,31 +89,33 @@ export function ManualEntryForm({
   }, [entryToEdit, form]);
 
   async function onSubmit(data: TimeEntryFormValues) {
-    const combineDateTime = (date: Date, timeStr: string) => {
+    // ✅ HELPER: Combine Date + Time input into a UTC ISO String
+    const getUtcIsoString = (dateInput: Date, timeStr: string) => {
       const [hours, minutes] = timeStr.split(":").map(Number);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const day = String(date.getDate()).padStart(2, "0");
-      const hoursStr = String(hours).padStart(2, "0");
-      const minutesStr = String(minutes).padStart(2, "0");
-      return `${year}-${month}-${day}T${hoursStr}:${minutesStr}:00`;
+
+      // Create a date object in Local Time
+      const localDate = new Date(dateInput);
+      localDate.setHours(hours);
+      localDate.setMinutes(minutes);
+      localDate.setSeconds(0);
+      localDate.setMilliseconds(0);
+
+      // .toISOString() automatically converts Local -> UTC (e.g. 09:00 IST -> 03:30 Z)
+      return localDate.toISOString();
     };
 
     const payload = {
       project_id: data.project_id,
       description: data.description,
       is_billable: data.is_billable,
-      start_time: combineDateTime(data.date, data.start_time),
-      end_time: combineDateTime(data.date, data.end_time),
+      start_time: getUtcIsoString(data.date, data.start_time),
+      end_time: getUtcIsoString(data.date, data.end_time),
     };
 
     if (entryToEdit) {
-      // UPDATE MODE
       await updateEntry({ id: entryToEdit.id, payload });
     } else {
-      // CREATE MODE
       await createEntry(payload);
-      // Only reset form on create (on edit we usually close modal)
       form.reset({
         project_id: "",
         description: "",
@@ -150,7 +150,7 @@ export function ManualEntryForm({
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {/* Row 1: Project & Description */}
+          {/* Project & Description inputs (Same as before) */}
           <div className="grid gap-4 md:grid-cols-2">
             <FormField
               control={form.control}
@@ -202,7 +202,7 @@ export function ManualEntryForm({
             />
           </div>
 
-          {/* Row 2: Date & Times */}
+          {/* Date & Time Inputs (Same as before) */}
           <div className="grid gap-4 md:grid-cols-3">
             <FormField
               control={form.control}
@@ -275,7 +275,7 @@ export function ManualEntryForm({
             />
           </div>
 
-          {/* Row 3: Billable & Submit */}
+          {/* Billable & Submit */}
           <div className="flex flex-col md:flex-row md:gap-0 gap-4 items-center justify-between pt-2">
             <FormField
               control={form.control}
@@ -285,7 +285,7 @@ export function ManualEntryForm({
                   <FormControl>
                     <Checkbox
                       checked={field.value}
-                      onCheckedChange={(checked) => field.onChange(checked)}
+                      onCheckedChange={field.onChange}
                     />
                   </FormControl>
                   <div className="space-y-1 leading-none">

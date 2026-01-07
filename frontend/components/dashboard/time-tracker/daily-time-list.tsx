@@ -24,19 +24,26 @@ import { TimeEntryWithProject } from "@/lib/types";
 import { useTimeEntries } from "@/lib/hooks/use-time-entries";
 import { TrackerFilters } from "./tracker-filters";
 import { ManualEntryForm } from "./manual-entry-form";
-// IMPORT THE HELPER
-import { parseBackendDate } from "@/lib/utils/utils";
 
-const getDateLabel = (dateString: string) => {
-  // Ensure we parse the date string correctly as a local date for comparison
-  const date = new Date(dateString);
-  if (isToday(date)) return "Today";
-  if (isYesterday(date)) return "Yesterday";
-  return format(date, "EEE, MMM do");
+const getDateLabel = (dateObj: Date) => {
+  if (isToday(dateObj)) return "Today";
+  if (isYesterday(dateObj)) return "Yesterday";
+  return format(dateObj, "EEE, MMM do");
+};
+
+const parseDate = (dateString: string) => {
+  if (!dateString) return new Date();
+
+  let cleanStr = dateString.replace(" ", "T");
+  if (!cleanStr.endsWith("Z") && !cleanStr.includes("+")) {
+    cleanStr += "Z";
+  }
+  return new Date(cleanStr);
 };
 
 interface GroupedEntry {
-  date: string;
+  dateObj: Date;
+  dateLabel: string;
   totalSeconds: number;
   entries: TimeEntryWithProject[];
 }
@@ -76,25 +83,27 @@ export function DailyTimeList() {
   const { entries, isLoading, deleteEntry, isDeleting } =
     useTimeEntries(filters);
 
-  // --- GROUPING LOGIC (FIXED TIMEZONE) ---
+  // --- GROUPING LOGIC ---
   const groupedEntries = useMemo(() => {
     if (!entries) return {};
 
-    // Sort by actual time first
-    const sorted = [...entries].sort(
-      (a, b) =>
-        parseBackendDate(b.start_time).getTime() -
-        parseBackendDate(a.start_time).getTime()
-    );
+    // 1. Sort Entries: Newest -> Oldest
+    const sorted = [...entries].sort((a, b) => {
+      return (
+        parseDate(b.start_time).getTime() - parseDate(a.start_time).getTime()
+      );
+    });
 
     return sorted.reduce((groups, entry) => {
-      // FIX 1: Parse the backend date to Local Time before formatting as YYYY-MM-DD
-      // This ensures entries from 11 PM UTC (which might be 4 AM Tomorrow Local) go into the correct day bucket
-      const dateKey = format(parseBackendDate(entry.start_time), "yyyy-MM-dd");
+      // ✅ FIX: Convert to Local Date Object FIRST
+      // This ensures correct grouping by Local Day
+      const localDate = parseDate(entry.start_time);
+      const dateKey = format(localDate, "yyyy-MM-dd");
 
       if (!groups[dateKey]) {
         groups[dateKey] = {
-          date: dateKey,
+          dateObj: localDate,
+          dateLabel: dateKey,
           totalSeconds: 0,
           entries: [],
         };
@@ -107,7 +116,12 @@ export function DailyTimeList() {
     }, {} as Record<string, GroupedEntry>);
   }, [entries]);
 
-  const days = Object.values(groupedEntries);
+  // --- DAYS ARRAY LOGIC ---
+  const days = useMemo(() => {
+    return Object.values(groupedEntries).sort((a, b) => {
+      return b.dateObj.getTime() - a.dateObj.getTime();
+    });
+  }, [groupedEntries]);
 
   const grandTotalSeconds = useMemo(() => {
     return (
@@ -116,6 +130,7 @@ export function DailyTimeList() {
     );
   }, [entries]);
 
+  // --- CSV EXPORT ---
   const handleExportCSV = () => {
     if (!entries || entries.length === 0) return;
 
@@ -130,13 +145,13 @@ export function DailyTimeList() {
     ];
 
     const rows = entries.map((e) => {
-      const startDate = parseBackendDate(e.start_time);
-      const endDate = e.end_time ? parseBackendDate(e.end_time) : null;
+      const start = parseDate(e.start_time);
+      const end = e.end_time ? parseDate(e.end_time) : null;
 
       return [
-        format(startDate, "yyyy-MM-dd"),
-        format(startDate, "HH:mm"),
-        endDate ? format(endDate, "HH:mm") : "Running",
+        format(start, "yyyy-MM-dd"), // Local Date
+        format(start, "HH:mm"), // Local Time
+        end ? format(end, "HH:mm") : "Running",
         e.project?.name || "No Project",
         `"${e.description?.replace(/"/g, '""') || ""}"`,
         e.duration_seconds ? (e.duration_seconds / 3600).toFixed(2) : "0.00",
@@ -149,7 +164,6 @@ export function DailyTimeList() {
       ...rows.map((e) => e.join(",")),
     ].join("\n");
 
-    // Trigger Download
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -175,18 +189,32 @@ export function DailyTimeList() {
         setStatus={setStatus}
       />
 
+      {/* 2. TOTALS & EXPORT BUTTON */}
       {!isLoading && entries && (
         <div className="flex items-center justify-between rounded-lg border bg-muted/40 px-4 py-3">
           <span className="text-sm font-medium text-muted-foreground">
             Total for selected period
           </span>
-          <span className="text-xl font-bold font-mono text-foreground">
-            {formatDurationTime(grandTotalSeconds)}
-          </span>
+          <div className="flex items-center gap-4">
+            <span className="text-xl font-bold font-mono text-foreground">
+              {formatDurationTime(grandTotalSeconds)}
+            </span>
+            {entries.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportCSV}
+                className="h-8"
+              >
+                <Download className="mr-2 h-3.5 w-3.5" />
+                Export CSV
+              </Button>
+            )}
+          </div>
         </div>
       )}
 
-      {/* 2. LOADING STATE */}
+      {/* 3. LOADING STATE */}
       {isLoading && (
         <div className="flex flex-col gap-4">
           {[1, 2].map((i) => (
@@ -198,7 +226,7 @@ export function DailyTimeList() {
         </div>
       )}
 
-      {/* 3. EMPTY STATE */}
+      {/* 4. EMPTY STATE */}
       {!isLoading && days.length === 0 && (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed p-12 text-center text-muted-foreground bg-card">
           <div className="mb-4 rounded-full bg-muted p-4">
@@ -211,39 +239,33 @@ export function DailyTimeList() {
         </div>
       )}
 
-      {/* 4. LIST VIEW */}
+      {/* 5. LIST VIEW */}
       {!isLoading && days.length > 0 && (
         <div className="space-y-8">
           {days.map((day) => (
             <Card
-              key={day.date}
+              key={day.dateLabel}
               className="overflow-hidden border-none shadow-sm bg-transparent"
             >
-              {/* Day Header */}
               <div className="flex items-center justify-between px-1 pb-3">
                 <h3 className="text-lg font-semibold text-foreground">
-                  {getDateLabel(day.date)}
+                  {getDateLabel(day.dateObj)}
                 </h3>
                 <span className="text-sm font-medium text-muted-foreground">
                   Total: {formatDurationTime(day.totalSeconds)}
                 </span>
               </div>
 
-              {/* List of Entries */}
               <div className="divide-y rounded-xl border bg-card">
                 {day.entries.map((entry) => {
-                  // FIX 2: Parse times for display
-                  const startTime = parseBackendDate(entry.start_time);
-                  const endTime = entry.end_time
-                    ? parseBackendDate(entry.end_time)
-                    : null;
+                  const start = parseDate(entry.start_time);
+                  const end = entry.end_time ? parseDate(entry.end_time) : null;
 
                   return (
                     <div
                       key={entry.id}
                       className="group flex flex-col gap-3 p-4 transition-colors hover:bg-muted/30 sm:flex-row sm:items-center sm:justify-between"
                     >
-                      {/* Left: Project & Description */}
                       <div className="flex flex-col gap-1 sm:max-w-[50%]">
                         <div className="flex items-center gap-2">
                           <span
@@ -269,22 +291,20 @@ export function DailyTimeList() {
                         </p>
                       </div>
 
-                      {/* Right: Time & Actions */}
                       <div className="flex items-center justify-between gap-4 sm:justify-end">
                         <div className="flex flex-col items-end gap-0.5 text-right">
                           <span className="font-mono text-sm font-medium">
                             {formatDurationTime(entry.duration_seconds || 0)}
                           </span>
                           <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            {/* FIX 3: Display Correct Local Time */}
-                            {format(startTime, "HH:mm")}
+                            {/* ✅ Display Local Time */}
+                            {format(start, "HH:mm")}
                             <span>-</span>
-                            {endTime ? format(endTime, "HH:mm") : "Now"}
+                            {end ? format(end, "HH:mm") : "Now"}
                           </div>
                         </div>
 
                         <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                          {/* EDIT */}
                           <Button
                             variant="ghost"
                             size="icon"
@@ -293,8 +313,6 @@ export function DailyTimeList() {
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
-
-                          {/* DELETE */}
                           <Button
                             variant="ghost"
                             size="icon"
@@ -316,30 +334,6 @@ export function DailyTimeList() {
               </div>
             </Card>
           ))}
-        </div>
-      )}
-
-      {!isLoading && entries && (
-        <div className="flex items-center justify-between rounded-lg border bg-muted/40 px-4 py-3">
-          <span className="text-sm font-medium text-muted-foreground">
-            Total for selected period
-          </span>
-          <div className="flex items-center gap-4">
-            <span className="text-xl font-bold font-mono text-foreground">
-              {formatDurationTime(grandTotalSeconds)}
-            </span>
-            {entries.length > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExportCSV}
-                className="h-8"
-              >
-                <Download className="mr-2 h-3.5 w-3.5" />
-                Export CSV
-              </Button>
-            )}
-          </div>
         </div>
       )}
 
