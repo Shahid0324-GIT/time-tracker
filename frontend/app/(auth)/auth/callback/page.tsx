@@ -1,7 +1,8 @@
 "use client";
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/lib/stores/authStore";
+import { authApi } from "@/lib/api/auth"; // Import our API wrapper
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Route } from "next";
@@ -11,8 +12,13 @@ function AuthCallbackContent() {
   const searchParams = useSearchParams();
   const { login } = useAuthStore();
 
+  // Use a ref to prevent double-firing in React Strict Mode
+  const processedRef = useRef(false);
+
   useEffect(() => {
-    const token = searchParams.get("token");
+    if (processedRef.current) return;
+    processedRef.current = true;
+
     const error = searchParams.get("error");
 
     if (error) {
@@ -21,36 +27,27 @@ function AuthCallbackContent() {
       return;
     }
 
-    if (token) {
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then((res) => res.json())
-        .then((user) => {
-          // 1. Log the user in (save token to cookies/store)
-          login(user, token);
+    // verification function
+    const verifyUser = async () => {
+      try {
+        const user = await authApi.getMe();
+        login(user);
 
-          // 2. CHECK: Does the user have business details set?
-          if (!user.business_name) {
-            // If not, redirect to the onboarding page
-            toast.info("Welcome! Let's set up your business profile.");
-            router.push("/complete-profile" as Route);
-          } else {
-            // If yes, go straight to dashboard
-            toast.success("Successfully logged in!");
-            router.push("/dashboard" as Route);
-          }
-        })
-        .catch(() => {
-          toast.error("Failed to fetch user info");
-          router.push("/login" as Route);
-        });
-    } else {
-      toast.error("No token received");
-      router.push("/login" as Route);
-    }
+        if (!user.business_name) {
+          toast.info("Welcome! Let's set up your business profile.");
+          router.push("/complete-profile" as Route);
+        } else {
+          toast.success("Successfully logged in!");
+          router.push("/dashboard" as Route);
+        }
+      } catch (err) {
+        console.error("Callback verification failed", err);
+        toast.error("Failed to verify authentication");
+        router.push("/login" as Route);
+      }
+    };
+
+    verifyUser();
   }, [searchParams, router, login]);
 
   return (
