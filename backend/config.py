@@ -17,7 +17,7 @@ load_dotenv(".env")
 COOKIE_NAME = "access_token"
 COOKIE_MAX_AGE = 60 * 60 * 24 * 7  
 IS_PRODUCTION = os.getenv("RENDER") is not None or os.getenv("ENVIRONMENT") == "production"
-COOKIE_SECURE = IS_PRODUCTION
+COOKIE_SECURE = True if IS_PRODUCTION else False
 COOKIE_SAMESITE = "none" if IS_PRODUCTION else "lax"
 
 # ============================================

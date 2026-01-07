@@ -5,7 +5,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from db import create_db_and_tables
 from routers import auth_routes, users, oauth, clients, projects, time_entries, invoices
 from contextlib import asynccontextmanager
-from config import SECRET_KEY, FRONTEND_URL
+from config import SECRET_KEY, FRONTEND_URL, COOKIE_SAMESITE, IS_PRODUCTION
 
 # Load environment variables
 
@@ -45,8 +45,8 @@ app.add_middleware(
     secret_key=SECRET_KEY,
     session_cookie="session",
     max_age=3600,  # 1 hour
-    same_site="lax",
-    https_only=False,  # Set to True in production with HTTPS
+    same_site=COOKIE_SAMESITE,
+    https_only=True if IS_PRODUCTION else False,
 )
 
 # ============================================
