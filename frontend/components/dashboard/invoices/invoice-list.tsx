@@ -92,6 +92,17 @@ export function InvoiceList({
     return matchesSearch && matchesStatus;
   });
 
+  // --- SORT LOGIC (Newest First) ---
+  const sortedInvoices = filteredInvoices?.sort((a, b) => {
+    // Extract number from "INV-001" -> 1
+    const getNumber = (str: string) => {
+      const match = str.match(/INV-(\d+)/);
+      return match ? parseInt(match[1], 10) : 0;
+    };
+
+    return getNumber(b.invoice_number) - getNumber(a.invoice_number);
+  });
+
   // --- ACTIONS ---
   const markAsPaid = async (id: string) => {
     await updateInvoice({ id, payload: { status: InvoiceStatus.PAID } });
@@ -125,7 +136,7 @@ export function InvoiceList({
     return <InvoiceSkeleton />;
   }
 
-  if (!filteredInvoices || filteredInvoices.length === 0) {
+  if (!sortedInvoices || sortedInvoices.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-xl border border-dashed p-12 text-center text-muted-foreground bg-card">
         <div className="mb-4 rounded-full bg-muted p-4">
@@ -154,7 +165,7 @@ export function InvoiceList({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredInvoices.map((inv) => {
+            {sortedInvoices.map((inv) => {
               const client = clients?.find((c) => c.id === inv.client_id);
               const clientName = inv.client?.name || client?.name || "Unknown";
 

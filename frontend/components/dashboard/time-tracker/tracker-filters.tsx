@@ -1,9 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { CalendarIcon, X } from "lucide-react";
+import { CalendarIcon, RotateCcw } from "lucide-react";
 import { DateRange } from "react-day-picker";
-import { format } from "date-fns";
+import { format, startOfMonth, endOfMonth } from "date-fns"; // <--- Added imports
 import { cn } from "@/lib/utils/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -26,7 +26,6 @@ interface TrackerFiltersProps {
   setDateRange: (range: DateRange | undefined) => void;
   projectId: string;
   setProjectId: (id: string) => void;
-  // New Prop
   status: string;
   setStatus: (status: string) => void;
 }
@@ -42,7 +41,14 @@ export function TrackerFilters({
   const { projects } = useProjects();
   const activeProjects = projects?.filter((p) => p.is_active) || [];
 
-  const isFiltered = projectId !== "all" || status !== "all" || dateRange?.from;
+  const handleReset = () => {
+    setProjectId("all");
+    setStatus("all");
+    setDateRange({
+      from: startOfMonth(new Date()),
+      to: endOfMonth(new Date()),
+    });
+  };
 
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
@@ -55,7 +61,7 @@ export function TrackerFilters({
                 id="date"
                 variant={"outline"}
                 className={cn(
-                  "w-60 justify-start text-left font-normal",
+                  "w-65 justify-start text-left font-normal",
                   !dateRange && "text-muted-foreground"
                 )}
               >
@@ -76,7 +82,7 @@ export function TrackerFilters({
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
-                initialFocus
+                autoFocus
                 mode="range"
                 defaultMonth={dateRange?.from}
                 selected={dateRange}
@@ -88,11 +94,8 @@ export function TrackerFilters({
         </div>
 
         {/* PROJECT FILTER */}
-        <div className="w-45">
-          <Select
-            value={projectId === "all" ? undefined : projectId}
-            onValueChange={setProjectId}
-          >
+        <div className="w-50">
+          <Select value={projectId} onValueChange={setProjectId}>
             <SelectTrigger>
               <SelectValue placeholder="All Projects" />
             </SelectTrigger>
@@ -100,12 +103,12 @@ export function TrackerFilters({
               <SelectItem value="all">All Projects</SelectItem>
               {activeProjects.map((p) => (
                 <SelectItem key={p.id} value={p.id}>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 max-w-37.5">
                     <div
-                      className="h-2 w-2 rounded-full"
+                      className="h-2 w-2 rounded-full shrink-0"
                       style={{ backgroundColor: p.color }}
                     />
-                    {p.name}
+                    <span className="truncate">{p.name}</span>
                   </div>
                 </SelectItem>
               ))}
@@ -113,12 +116,9 @@ export function TrackerFilters({
           </Select>
         </div>
 
-        {/* NEW: STATUS FILTER (Billable) */}
-        <div className="w-37.5">
-          <Select
-            value={status === "all" ? undefined : status}
-            onValueChange={setStatus}
-          >
+        {/* STATUS FILTER */}
+        <div className="w-45">
+          <Select value={status} onValueChange={setStatus}>
             <SelectTrigger>
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
@@ -130,22 +130,17 @@ export function TrackerFilters({
           </Select>
         </div>
 
-        {/* CLEAR FILTERS BUTTON */}
-        {isFiltered && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              setProjectId("all");
-              setStatus("all");
-              setDateRange(undefined);
-            }}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <X className="h-4 w-4 mr-1" />
-            Clear
-          </Button>
-        )}
+        {/* RESET BUTTON */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleReset}
+          className="text-muted-foreground hover:text-foreground h-10 px-3"
+          title="Reset to current month and all projects"
+        >
+          <RotateCcw className="h-4 w-4 mr-1" />
+          Reset
+        </Button>
       </div>
     </div>
   );

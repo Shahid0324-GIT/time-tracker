@@ -1,11 +1,11 @@
-import { useEffect, useRef } from "react"; // <--- Add this
+import { useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { timeApi } from "@/lib/api/time";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 import { useTimerStore } from "../stores/timerStore";
+import { TimerStartRequest, TimerResponse } from "@/lib/types";
 
-// Define the shape of your backend error response
 interface ApiErrorResponse {
   detail: string;
 }
@@ -13,7 +13,6 @@ interface ApiErrorResponse {
 export function useTimer() {
   const queryClient = useQueryClient();
   const { setRunningTimer, runningTimer: storeTimer } = useTimerStore();
-
   const isMutating = useRef(false);
 
   const { data: apiTimer, isLoading } = useQuery({
@@ -25,21 +24,36 @@ export function useTimer() {
 
   useEffect(() => {
     if (isMutating.current) return;
-
-    // Only sync if API data is loaded (undefined means loading)
     if (apiTimer !== undefined) {
       setRunningTimer(apiTimer);
     }
   }, [apiTimer, setRunningTimer]);
 
-  // Start Timer Mutation
   const startMutation = useMutation({
-    mutationFn: timeApi.startTimer,
-    onMutate: () => {
+    mutationFn: (variables: TimerStartRequest) => {
+      const payload = {
+        ...variables,
+        start_time: variables.start_time || new Date().toISOString(),
+      };
+      return timeApi.startTimer(payload);
+    },
+    onMutate: async (variables) => {
       isMutating.current = true;
+      await queryClient.cancelQueries({ queryKey: ["timer-running"] });
+
+      const startTime = variables.start_time || new Date().toISOString();
+
+      const optimisticTimer: TimerResponse = {
+        id: "temp-id",
+        project_id: variables.project_id,
+        description: variables.description,
+        start_time: startTime,
+        elapsed_seconds: 0,
+      };
+
+      setRunningTimer(optimisticTimer);
     },
     onSuccess: (data) => {
-      // Optimistic update
       setRunningTimer(data);
       queryClient.setQueryData(["timer-running"], data);
       queryClient.invalidateQueries({ queryKey: ["time-entries"] });
@@ -51,18 +65,18 @@ export function useTimer() {
     },
     onError: (error: AxiosError<ApiErrorResponse>) => {
       isMutating.current = false;
+      setRunningTimer(null);
       toast.error(error.response?.data?.detail || "Failed to start timer");
     },
   });
 
-  // Stop Timer Mutation
   const stopMutation = useMutation({
     mutationFn: timeApi.stopTimer,
-    onMutate: () => {
+    onMutate: async () => {
       isMutating.current = true;
+      setRunningTimer(null);
     },
     onSuccess: () => {
-      setRunningTimer(null);
       queryClient.setQueryData(["timer-running"], null);
       queryClient.invalidateQueries({ queryKey: ["time-entries"] });
       toast.success("Timer stopped");
@@ -72,6 +86,7 @@ export function useTimer() {
     },
     onError: (error: AxiosError<ApiErrorResponse>) => {
       isMutating.current = false;
+      queryClient.invalidateQueries({ queryKey: ["timer-running"] });
       toast.error(error.response?.data?.detail || "Failed to stop timer");
     },
   });

@@ -87,7 +87,7 @@ export function DailyTimeList() {
   const groupedEntries = useMemo(() => {
     if (!entries) return {};
 
-    // 1. Sort Entries: Newest -> Oldest
+    // 1. Sort Entries: Newest -> Oldest (Initial sort)
     const sorted = [...entries].sort((a, b) => {
       return (
         parseDate(b.start_time).getTime() - parseDate(a.start_time).getTime()
@@ -95,8 +95,7 @@ export function DailyTimeList() {
     });
 
     return sorted.reduce((groups, entry) => {
-      // ✅ FIX: Convert to Local Date Object FIRST
-      // This ensures correct grouping by Local Day
+      // Convert to Local Date Object FIRST
       const localDate = parseDate(entry.start_time);
       const dateKey = format(localDate, "yyyy-MM-dd");
 
@@ -118,9 +117,32 @@ export function DailyTimeList() {
 
   // --- DAYS ARRAY LOGIC ---
   const days = useMemo(() => {
-    return Object.values(groupedEntries).sort((a, b) => {
+    // 1. Sort Days by Date (Newest first)
+    const sortedDays = Object.values(groupedEntries).sort((a, b) => {
       return b.dateObj.getTime() - a.dateObj.getTime();
     });
+
+    // 2. ✅ FIX: Group (Sort) entries within each day by Project Name
+    sortedDays.forEach((day) => {
+      day.entries.sort((a, b) => {
+        // Use "zz" to push entries with no project to the bottom
+        const projectA = a.project?.name || "zz_NoProject";
+        const projectB = b.project?.name || "zz_NoProject";
+
+        // Primary Sort: Project Name (A -> Z)
+        const nameComparison = projectA.localeCompare(projectB);
+        if (nameComparison !== 0) {
+          return nameComparison;
+        }
+
+        // Secondary Sort: Start Time (Newest -> Oldest)
+        return (
+          parseDate(b.start_time).getTime() - parseDate(a.start_time).getTime()
+        );
+      });
+    });
+
+    return sortedDays;
   }, [groupedEntries]);
 
   const grandTotalSeconds = useMemo(() => {
@@ -297,7 +319,6 @@ export function DailyTimeList() {
                             {formatDurationTime(entry.duration_seconds || 0)}
                           </span>
                           <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            {/* ✅ Display Local Time */}
                             {format(start, "HH:mm")}
                             <span>-</span>
                             {end ? format(end, "HH:mm") : "Now"}

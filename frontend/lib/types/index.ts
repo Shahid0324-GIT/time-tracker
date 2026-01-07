@@ -172,6 +172,7 @@ export interface TimeEntryManual {
 export interface TimerStartRequest {
   project_id: string;
   description?: string;
+  start_time?: string;
 }
 
 export interface TimerResponse {
