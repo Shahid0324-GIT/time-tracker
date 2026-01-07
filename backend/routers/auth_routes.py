@@ -86,6 +86,8 @@ def login_user(
     
     token = create_access_token(data={"sub": str(user.id)})
     
+    # 🔍 DEBUG: Check logs in Render Dashboard to see these values
+    print(f"DEBUG COOKIE: Secure={COOKIE_SECURE}, SameSite={COOKIE_SAMESITE}")
     # Set HttpOnly Cookie
     response.set_cookie(
         key=COOKIE_NAME,

@@ -5,7 +5,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from db import create_db_and_tables
 from routers import auth_routes, users, oauth, clients, projects, time_entries, invoices
 from contextlib import asynccontextmanager
-from config import SECRET_KEY, FRONTEND_URL, COOKIE_SAMESITE, IS_PRODUCTION
+from config import SECRET_KEY, FRONTEND_URL, COOKIE_SAMESITE, IS_PRODUCTION, COOKIE_SECURE
 
 # Load environment variables
 
@@ -37,6 +37,8 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# 🔍 DEBUG: Check logs in Render Dashboard to see these values
+print(f"DEBUG COOKIE: Secure={COOKIE_SECURE}, SameSite={COOKIE_SAMESITE}")
 # ============================================
 # SESSION MIDDLEWARE (Must be added FIRST for OAuth)
 # ============================================
