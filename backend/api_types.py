@@ -226,6 +226,7 @@ class TimerStartRequest(BaseModel):
     """Request to start a timer"""
     project_id: UUID
     description: Optional[str] = None
+    start_time: Optional[datetime] = None
 
 class TimerResponse(BaseModel):
     """Response for running timer"""

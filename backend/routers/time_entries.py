@@ -51,42 +51,31 @@ def start_timer(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user)
 ):
-    """
-    Start a timer for a project
-    
-    - Only one timer can run at a time per user
-    - Timer creates a time entry with no end_time
-    """
-    
-    # Check if project exists and belongs to user
     project = session.get(Project, timer_data.project_id)
     if not project or project.user_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Project not found"
-        )
+        raise HTTPException(status_code=404, detail="Project not found")
     
-    # Check if there's already a running timer
     statement = select(TimeEntry).where(
         TimeEntry.user_id == current_user.id,
-        TimeEntry.end_time == (None),
+        TimeEntry.end_time == None,
         TimeEntry.is_active == True
     )
-    running_timer = session.exec(statement).first()
+    if session.exec(statement).first():
+        raise HTTPException(status_code=400, detail="Timer already running")
     
-    if running_timer:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Timer already running for project {running_timer.project_id}"
-        )
-    
-    # Create timer entry (no end_time)
+    if timer_data.start_time:
+        start_time = timer_data.start_time
+        if start_time.tzinfo is None:
+            start_time = start_time.replace(tzinfo=timezone.utc)
+    else:
+        start_time = datetime.now(timezone.utc)
+
     timer_entry = TimeEntry(
         user_id=current_user.id,
         project_id=timer_data.project_id,
         description=timer_data.description,
-        start_time=datetime.now(timezone.utc),
-        end_time=None,  # Timer is running
+        start_time=start_time, # <--- Use the calculated start_time
+        end_time=None,
         duration_seconds=None
     )
     
