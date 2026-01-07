@@ -1,9 +1,8 @@
 from datetime import datetime, timedelta, timezone
-from typing import Optional, cast
+from typing import Optional
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import Depends, HTTPException, status, Request
 import uuid
 
 from sqlmodel import Session, select
@@ -16,14 +15,11 @@ from config import *
 # Password hashing setup
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# HTTP Bearer token scheme for FastAPI
-security = HTTPBearer()
-
-def hash_password(password:str) -> str:
+def hash_password(password: str) -> str:
     """Hashing the users password before storing it in the db"""
     return pwd_context.hash(password)
 
-def verify_password(plain_password:str, hashed_password:str) -> bool:
+def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verifying the user's password"""
     return pwd_context.verify(plain_password, hashed_password)
 
@@ -56,26 +52,38 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     return encoded_jwt
 
 # ============================================
+# COOKIE EXTRACTION
+# ============================================
+
+def get_token_from_cookie(request: Request) -> str:
+    """
+    Extracts the JWT token from the httpOnly cookie.
+    """
+    token = request.cookies.get("access_token")
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+        )
+    return token
+
+# ============================================
 # DEPENDENCY: GET CURRENT USER
 # ============================================
 
 async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
+    token: str = Depends(get_token_from_cookie),
     session: Session = Depends(get_session)
 ) -> User:
     """
-    Dependency to get the current authenticated user from JWT token
+    Dependency to get the current authenticated user from JWT token found in cookie
     """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
     )
     
     try:
-        # Extract token from Authorization header
-        token = credentials.credentials
-        
         # Decode JWT token
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM]) # type: ignore
         user_id: str | None = payload.get("sub")
@@ -87,14 +95,22 @@ async def get_current_user(
         raise credentials_exception
     
     # Get user from database
-    user = session.get(User, uuid.UUID(user_id))
+    try:
+        user_uuid = uuid.UUID(user_id)
+    except ValueError:
+        raise credentials_exception
+
+    user = session.get(User, user_uuid)
     
     if user is None:
         raise credentials_exception
     
     return user
 
-# OAuth create/get
+# ============================================
+# OAUTH HELPERS
+# ============================================
+
 def get_or_create_oauth_user(
     session: Session,
     email: str,
@@ -105,17 +121,6 @@ def get_or_create_oauth_user(
 ) -> User:
     """
     Find existing OAuth user or create new one
-    
-    Args:
-        session: Database session
-        email: User email from OAuth provider
-        name: User full name from OAuth provider
-        oauth_provider: "google" or "github"
-        oauth_id: User's ID from OAuth provider
-        avatar_url: Profile picture URL
-    
-    Returns:
-        User object
     """
     # Check if user exists by OAuth ID
     statement = select(User).where(
@@ -125,7 +130,6 @@ def get_or_create_oauth_user(
     user = session.exec(statement).first()
     
     if user:
-        # User exists, return it
         return user
     
     # Check if user exists by email (link accounts)
@@ -144,7 +148,6 @@ def get_or_create_oauth_user(
         return user
     
     # Create new user
-    # Split name into first and last
     name_parts = name.split(' ', 1)
     first_name = name_parts[0]
     last_name = name_parts[1] if len(name_parts) > 1 else ''
@@ -156,7 +159,7 @@ def get_or_create_oauth_user(
         oauth_provider=oauth_provider,
         oauth_id=oauth_id,
         avatar_url=avatar_url,
-        hashed_password=None,  # OAuth users don't have passwords
+        hashed_password=None,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
