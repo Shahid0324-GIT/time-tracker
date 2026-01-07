@@ -4,47 +4,21 @@ import { User } from "@/lib/types";
 
 interface AuthState {
   user: User | null;
-  token: string | null;
   isAuthenticated: boolean;
-  login: (user: User, token: string) => void;
+  login: (user: User) => void;
   logout: () => void;
   setUser: (user: User | null) => void;
 }
-
-const cookieStorage = {
-  getItem: (name: string): string | null => {
-    if (typeof window === "undefined") return null;
-    const matches = document.cookie.match(
-      new RegExp(
-        "(?:^|; )" + name.replace(/([.$?*|{}()[\]\\/+^])/g, "\\$1") + "=([^;]*)"
-      )
-    );
-    return matches ? decodeURIComponent(matches[1]) : null;
-  },
-  setItem: (name: string, value: string): void => {
-    if (typeof window === "undefined") return;
-    const maxAge = 60 * 60 * 24 * 7; // 7 days
-    document.cookie = `${name}=${encodeURIComponent(
-      value
-    )}; max-age=${maxAge}; path=/; SameSite=Lax`;
-  },
-  removeItem: (name: string): void => {
-    if (typeof window === "undefined") return;
-    document.cookie = `${name}=; max-age=0; path=/`;
-  },
-};
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
-      token: null,
       isAuthenticated: false,
 
-      login: (user, token) => {
+      login: (user) => {
         set({
           user,
-          token,
           isAuthenticated: true,
         });
       },
@@ -52,7 +26,6 @@ export const useAuthStore = create<AuthState>()(
       logout: () => {
         set({
           user: null,
-          token: null,
           isAuthenticated: false,
         });
       },
@@ -63,7 +36,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: "auth-storage",
-      storage: createJSONStorage(() => cookieStorage),
+      storage: createJSONStorage(() => localStorage), // Safe to use localStorage for user profile
     }
   )
 );

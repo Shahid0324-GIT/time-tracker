@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/stores/authStore";
 import { authApi } from "@/lib/api/auth";
@@ -10,12 +10,13 @@ import { AxiosError } from "axios";
 export function useAuth() {
   const router = useRouter();
   const { login: setAuth, logout: clearAuth, isAuthenticated } = useAuthStore();
+  const queryClient = useQueryClient();
 
   // Login mutation
   const loginMutation = useMutation({
     mutationFn: (credentials: LoginCredentials) => authApi.login(credentials),
     onSuccess: (data) => {
-      setAuth(data.user, data.access_token);
+      setAuth(data.user);
       toast.success("Welcome back!");
       router.push("/dashboard" as Route);
     },
@@ -28,7 +29,7 @@ export function useAuth() {
   const registerMutation = useMutation({
     mutationFn: (data: RegisterData) => authApi.register(data),
     onSuccess: (data) => {
-      setAuth(data.user, data.access_token);
+      setAuth(data.user);
       toast.success("Account created successfully!");
       router.push("/dashboard" as Route);
     },
@@ -38,10 +39,19 @@ export function useAuth() {
   });
 
   // Logout
-  const logout = () => {
+  const logout = async () => {
+    queryClient.cancelQueries();
+
     clearAuth();
+    queryClient.clear();
     router.push("/login" as Route);
     toast.success("Logged out successfully");
+
+    try {
+      await authApi.logout();
+    } catch (e) {
+      console.error("Background logout error", e);
+    }
   };
 
   // Get current user (for protected routes)

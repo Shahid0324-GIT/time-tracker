@@ -3,11 +3,22 @@ import os
 from authlib.integrations.starlette_client import OAuth
 from starlette.config import Config
 
+
 # ============================================
 # LOAD ENVIRONMENT VARIABLES
 # ============================================
 
 load_dotenv(".env")
+
+# ============================================
+# Configuration for cookies
+# ============================================
+
+COOKIE_NAME = "access_token"
+COOKIE_MAX_AGE = 60 * 60 * 24 * 7  
+IS_PRODUCTION = os.getenv("RENDER") is not None or os.getenv("ENVIRONMENT") == "production"
+COOKIE_SECURE = IS_PRODUCTION
+COOKIE_SAMESITE = "none" if IS_PRODUCTION else "lax"
 
 # ============================================
 # DATABASE CONFIGURATION

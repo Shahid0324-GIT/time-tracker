@@ -23,6 +23,11 @@ export const authApi = {
     return response.data;
   },
 
+  // Logout (Clears HttpOnly Cookie)
+  logout: async (): Promise<void> => {
+    await api.post("/auth/logout");
+  },
+
   // Get current user
   getMe: async (): Promise<User> => {
     const response = await api.get<User>("/auth/me");

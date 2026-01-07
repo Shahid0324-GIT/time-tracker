@@ -35,10 +35,11 @@ import { getInitials } from "@/lib/utils/format";
 import { Route } from "next";
 import { SidebarSkeleton } from "./app-sidebar-skeleton";
 import Image from "next/image";
+import { useAuth } from "@/lib/hooks/useAuth";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
-  const { logout } = useAuthStore();
+  const { logout } = useAuth();
 
   const user = useAuthStore((state) => state.user);
 
