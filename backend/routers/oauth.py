@@ -46,7 +46,7 @@ async def google_callback(request: Request, session: Session = Depends(get_sessi
         # Set HttpOnly Cookie
         response.set_cookie(
             key=COOKIE_NAME,
-            value=token,
+            value=access_token,
             httponly=True,
             max_age=COOKIE_MAX_AGE,
             expires=COOKIE_MAX_AGE,
@@ -110,7 +110,7 @@ async def github_callback(request: Request, session: Session = Depends(get_sessi
         # Set HttpOnly Cookie
         response.set_cookie(
             key=COOKIE_NAME,
-            value=token,
+            value=access_token,
             httponly=True,
             max_age=COOKIE_MAX_AGE,
             expires=COOKIE_MAX_AGE,
