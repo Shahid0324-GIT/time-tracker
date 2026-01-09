@@ -34,6 +34,11 @@ export const authApi = {
     return response.data;
   },
 
+  // Exchange token for cookie
+  setSession: async (token: string) => {
+    return api.post("/auth/session", { access_token: token });
+  },
+
   // Update Profile (PATCH /users/me)
   updateProfile: async (data: UserUpdate): Promise<User> => {
     const response = await api.patch<User>("/users/me", data);

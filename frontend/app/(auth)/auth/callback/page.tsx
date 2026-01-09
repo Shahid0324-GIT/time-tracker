@@ -11,8 +11,6 @@ function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useAuthStore();
-
-  // Use a ref to prevent double-firing in React Strict Mode
   const processedRef = useRef(false);
 
   useEffect(() => {
@@ -20,41 +18,47 @@ function AuthCallbackContent() {
     processedRef.current = true;
 
     const error = searchParams.get("error");
+    const token = searchParams.get("token"); // ✅ Get Token
 
     if (error) {
-      toast.error("Authentication failed. Please try again.");
+      toast.error("Authentication failed.");
       router.push("/login" as Route);
       return;
     }
 
-    // verification function
-    const verifyUser = async () => {
+    const finalizeLogin = async () => {
       try {
+        if (token) {
+          await authApi.setSession(token);
+        }
+
         const user = await authApi.getMe();
         login(user);
 
+        toast.success("Successfully logged in!");
+
+        window.history.replaceState({}, document.title, "/auth/callback");
+
         if (!user.business_name) {
-          toast.info("Welcome! Let's set up your business profile.");
           router.push("/complete-profile" as Route);
         } else {
-          toast.success("Successfully logged in!");
           router.push("/dashboard" as Route);
         }
       } catch (err) {
-        console.error("Callback verification failed", err);
-        toast.error("Failed to verify authentication");
+        console.error("Login failed", err);
+        toast.error("Failed to finalize session.");
         router.push("/login" as Route);
       }
     };
 
-    verifyUser();
+    finalizeLogin();
   }, [searchParams, router, login]);
 
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center space-y-4">
         <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-        <p className="text-muted-foreground">Finalizing authentication...</p>
+        <p className="text-muted-foreground">Finalizing secure login...</p>
       </div>
     </div>
   );
