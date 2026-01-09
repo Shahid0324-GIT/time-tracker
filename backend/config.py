@@ -14,11 +14,18 @@ load_dotenv(".env")
 # Configuration for cookies
 # ============================================
 
-COOKIE_NAME = "access_token"
-COOKIE_MAX_AGE = 60 * 60 * 24 * 7  
 IS_PRODUCTION = os.getenv("RENDER") is not None or os.getenv("ENVIRONMENT") == "production"
-COOKIE_SECURE = True if IS_PRODUCTION else False
+
+# Cookie settings
+COOKIE_NAME = "access_token"
+COOKIE_MAX_AGE = 60 * 60 * 24 * 7 
+COOKIE_SECURE = IS_PRODUCTION  
 COOKIE_SAMESITE = "none" if IS_PRODUCTION else "lax"
+
+# Frontend URL
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+
+print(f"🔧 Config: IS_PRODUCTION={IS_PRODUCTION}, COOKIE_SECURE={COOKIE_SECURE}, COOKIE_SAMESITE={COOKIE_SAMESITE}")
 
 # ============================================
 # DATABASE CONFIGURATION

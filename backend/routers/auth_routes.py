@@ -54,9 +54,9 @@ def register_user(
         value=token,
         httponly=True,
         max_age=COOKIE_MAX_AGE,
-        expires=COOKIE_MAX_AGE,
         secure=COOKIE_SECURE,     
-        samesite=COOKIE_SAMESITE, 
+        samesite=COOKIE_SAMESITE,
+        path="/" 
     )
     
     # Return empty access_token string since it's now in the cookie
@@ -94,9 +94,9 @@ def login_user(
         value=token,
         httponly=True,
         max_age=COOKIE_MAX_AGE,
-        expires=COOKIE_MAX_AGE,
         secure=COOKIE_SECURE,     
-        samesite=COOKIE_SAMESITE, 
+        samesite=COOKIE_SAMESITE,
+        path="/" 
     )
     
     return Token(
@@ -111,8 +111,8 @@ def logout_user(response: Response):
     response.delete_cookie(
         key=COOKIE_NAME, 
         httponly=True, 
-        samesite="lax", 
-        secure=False
+        samesite=COOKIE_SAMESITE, 
+        secure=COOKIE_SECURE,
     )
     return {"message": "Logged out successfully"}
 
