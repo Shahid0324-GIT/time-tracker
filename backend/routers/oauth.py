@@ -4,13 +4,9 @@ from fastapi.responses import RedirectResponse
 from sqlmodel import Session
 from db import get_session
 from auth import get_or_create_oauth_user, create_access_token
-from config import FRONTEND_URL, oauth, COOKIE_NAME, COOKIE_MAX_AGE
+from config import FRONTEND_URL, oauth
 
 router = APIRouter(prefix="/auth", tags=["OAuth"])
-
-IS_PRODUCTION = os.getenv("RENDER") is not None or os.getenv("ENVIRONMENT") == "production"
-COOKIE_SECURE = IS_PRODUCTION
-COOKIE_SAMESITE = "none" if IS_PRODUCTION else "lax"
 
 @router.get("/google")
 async def google_login(request: Request):
@@ -45,29 +41,10 @@ async def google_callback(request: Request, session: Session = Depends(get_sessi
         
         access_token = create_access_token(data={"sub": str(user.id)})
         
-        # Create Redirect Response
-        response = RedirectResponse(url=f"{FRONTEND_URL}/auth/callback") 
-        
-        print(f"🍪 Setting cookie:")
-        print(f"   - Name: {COOKIE_NAME}")
-        print(f"   - Value: {access_token[:20]}...")
-        print(f"   - Secure: {COOKIE_SECURE}")
-        print(f"   - SameSite: {COOKIE_SAMESITE}")
-        print(f"   - IS_PRODUCTION: {IS_PRODUCTION}")
-        print(f"   - Redirect to: {FRONTEND_URL}/auth/callback")
-        
-        # Set HttpOnly Cookie
-        response.set_cookie(
-            key=COOKIE_NAME,
-            value=access_token,
-            httponly=True,
-            max_age=COOKIE_MAX_AGE, 
-            secure=COOKIE_SECURE,     
-            samesite=COOKIE_SAMESITE,
-            path="/"  
+        return RedirectResponse(
+            url=f"{FRONTEND_URL}/auth/callback?token={access_token}"
         )
         
-        return response
         
     except Exception as e:
         print(f"Google OAuth error: {e}")
@@ -117,21 +94,9 @@ async def github_callback(request: Request, session: Session = Depends(get_sessi
         
         access_token = create_access_token(data={"sub": str(user.id)})
         
-        # Create Redirect Response
-        response = RedirectResponse(url=f"{FRONTEND_URL}/auth/callback")
-        
-        # Set HttpOnly Cookie
-        response.set_cookie(
-            key=COOKIE_NAME,
-            value=access_token,
-            httponly=True,
-            max_age=COOKIE_MAX_AGE, 
-            secure=COOKIE_SECURE,     
-            samesite=COOKIE_SAMESITE,
-            path="/"  
+        return RedirectResponse(
+            url=f"{FRONTEND_URL}/auth/callback?token={access_token}"
         )
-        
-        return response
         
     except Exception as e:
         print(f"GitHub OAuth error: {e}")

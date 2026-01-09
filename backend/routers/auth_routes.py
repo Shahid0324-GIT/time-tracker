@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 
 from auth import verify_password, hash_password, get_current_user, create_access_token
 from models import User
-from api_types import UserCreate, UserLogin, UserResponse, Token, PasswordChange
+from api_types import UserCreate, UserLogin, UserResponse, Token, PasswordChange, TokenExchangeRequest
 from db import get_session
 from config import COOKIE_SECURE, COOKIE_SAMESITE, COOKIE_NAME, COOKIE_MAX_AGE
 
@@ -149,3 +149,26 @@ def change_password(
     session.commit()
     
     return {"message": "Password updated successfully"}
+
+@router.post("/session")
+def set_session_cookie(
+    response: Response,
+    request: TokenExchangeRequest
+):
+    """
+    Exchange a raw token for a HttpOnly cookie.
+    Used for OAuth flows where redirect cookies are blocked.
+    """
+    # 🔍 DEBUG
+    print(f"EXCHANGE COOKIE: Secure={COOKIE_SECURE}, SameSite={COOKIE_SAMESITE}")
+
+    response.set_cookie(
+        key=COOKIE_NAME,
+        value=request.access_token,
+        httponly=True,
+        max_age=COOKIE_MAX_AGE,
+        expires=COOKIE_MAX_AGE,
+        secure=COOKIE_SECURE,     
+        samesite=COOKIE_SAMESITE, 
+    )
+    return {"status": "success"}

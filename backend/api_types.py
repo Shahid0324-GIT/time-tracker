@@ -63,6 +63,9 @@ class Token(BaseModel):
     access_token: str
     token_type: str
     user: UserResponse
+    
+class TokenExchangeRequest(BaseModel):
+    access_token: str
 
 # ============================================
 # CLIENTS
