@@ -1,4 +1,4 @@
-# Time Tracker - Frontend
+# Freelance Flow - Frontend
 
 > Next.js 16 frontend for time tracking application
 

@@ -8,8 +8,8 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative w-full min-h-screen overflow-hidden bg-slate-50 dark:bg-slate-950">
-      <div className="absolute inset-0 z-0 flex items-center justify-center">
+    <div className="relative w-full min-h-screen overflow-hidden bg-slate-50 dark:bg-slate-950 transition-colors duration-500">
+      <div className="absolute hidden md:flex inset-0 z-0 items-center justify-center">
         <LiquidEther
           colors={["#5227FF", "#FF9FFC", "#B19EEF"]}
           mouseForce={20}

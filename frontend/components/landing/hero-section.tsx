@@ -51,17 +51,17 @@ export function HeroSection() {
         </motion.div>
 
         {/* HEADLINE */}
-        <div className="space-y-0 leading-none">
+        <div className="leading-none flex flex-col items-center">
           <BlurText
-            text="TIME IS"
+            text="SEIZE"
             className="text-6xl md:text-[10rem] font-black tracking-tighter text-cyan-700 dark:text-cyan-400 drop-shadow-[0_0_30px_rgba(34,211,238,0.3)]"
             delay={50}
             animateBy="letters"
             direction="top"
           />
-          <div className="h-2 md:h-8" />
+          <div className="h-2 md:h-4" />
           <BlurText
-            text="MONEY."
+            text="THE DAY."
             className="text-6xl md:text-[10rem] font-black tracking-tighter text-purple-700 dark:text-purple-500 drop-shadow-[0_0_30px_rgba(168,85,247,0.3)]"
             delay={50}
             animateBy="letters"
@@ -69,12 +69,56 @@ export function HeroSection() {
           />
         </div>
 
-        {/* SUBTITLE */}
+        {/* BROTHER'S CAPTION */}
+        <div className="flex flex-row space-x-10 justify-between">
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1, delay: 0.6 }}
+            className="text-lg md:text-xl uppercase tracking-[0.2em] font-bold text-cyan-700 dark:text-cyan-400 drop-shadow-[0_0_30px_rgba(34,211,238,0.3) mt-6 mb-2"
+          >
+            Action
+          </motion.p>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1, delay: 0.6 }}
+            className="text-lg md:text-xl uppercase tracking-[0.2em] font-bold  text-purple-700 dark:text-purple-500 drop-shadow-[0_0_30px_rgba(168,85,247,0.3) mt-6 mb-2"
+          >
+            -
+          </motion.p>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1, delay: 0.6 }}
+            className="text-lg md:text-xl uppercase tracking-[0.2em] font-bold  text-purple-700 dark:text-purple-500 drop-shadow-[0_0_30px_rgba(168,85,247,0.3) mt-6 mb-2"
+          >
+            Relieves
+          </motion.p>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1, delay: 0.6 }}
+            className="text-lg md:text-xl uppercase tracking-[0.2em] font-bold text-cyan-700 dark:text-cyan-400 drop-shadow-[0_0_30px_rgba(34,211,238,0.3) mt-6 mb-2"
+          >
+            -
+          </motion.p>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1, delay: 0.6 }}
+            className="text-lg md:text-xl uppercase tracking-[0.2em] font-bold text-cyan-700 dark:text-cyan-400 drop-shadow-[0_0_30px_rgba(34,211,238,0.3) mt-6 mb-2"
+          >
+            Anxiety
+          </motion.p>
+        </div>
+
+        {/* SUBTITLE (Existing) */}
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.8 }}
-          className="text-lg md:text-2xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed font-light pt-6"
+          className="text-lg md:text-2xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed font-light"
         >
           The{" "}
           <span className="text-black dark:text-white font-semibold">

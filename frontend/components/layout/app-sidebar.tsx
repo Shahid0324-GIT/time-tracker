@@ -65,7 +65,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Time Tracker</span>
+                  <span className="truncate font-semibold">Freelance Flow</span>
                   <span className="truncate text-xs text-muted-foreground">
                     Application
                   </span>

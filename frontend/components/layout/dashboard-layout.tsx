@@ -26,7 +26,7 @@ export default function DashboardClient({
       <AppSidebar />
       <SidebarInset>
         <DashboardHeader />
-        <main className="flex flex-1 flex-col gap-4 p-4 pt-0 transition-all">
+        <main className="flex flex-1 flex-col gap-4 p-4 pt-0 transition-colors duration-500">
           {children}
         </main>
       </SidebarInset>

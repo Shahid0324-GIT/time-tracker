@@ -89,7 +89,7 @@ export function LandingNavbar() {
               isScrolled ? "hidden md:block" : "block"
             }`}
           >
-            TimeTracker
+            Freelance Flow
           </span>
         </Link>
 

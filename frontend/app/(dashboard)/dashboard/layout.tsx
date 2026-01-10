@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import DashboardClient from "@/components/layout/dashboard-layout";
 
 export const metadata: Metadata = {
-  title: "Dashboard | Time Tracker Application",
+  title: "Dashboard | Freelance Flow Application",
   description: "Overview of your projects and invoices",
 };
 

@@ -22,13 +22,13 @@ export function Footer() {
               GitHub
             </a>
           </div>
-          <p>&copy; {date} Time Tracker. All rights reserved.</p>
+          <p>&copy; {date} Freelance Flow. All rights reserved.</p>
         </div>
 
         {/* THE BIG TEXT */}
         <div className="w-full text-center">
           <h1 className="text-[12vw] md:text-[14vw] font-black leading-none tracking-tighter text-black/5 dark:text-white/10 select-none hover:text-black/60 dark:hover:text-white/70 transition-colors duration-500">
-            TIME TRACKER
+            FREELANCE FLOW
           </h1>
         </div>
       </div>
