@@ -161,7 +161,8 @@ def get_or_create_oauth_user(
         avatar_url=avatar_url,
         hashed_password=None,
         created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc)
+        updated_at=datetime.now(timezone.utc),
+        is_verified=True
     )
     
     session.add(user)
