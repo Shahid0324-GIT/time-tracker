@@ -26,11 +26,7 @@ COOKIE_SAMESITE = "none" if IS_PRODUCTION else "lax"
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
 # Email Config
-MAIL_USERNAME = os.getenv("MAIL_USERNAME")
-MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
-MAIL_FROM = os.getenv("MAIL_FROM", MAIL_USERNAME)
-MAIL_PORT = int(os.getenv("MAIL_PORT", 465))
-MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.gmail.com")
+MAIL_FROM = os.getenv("MAIL_FROM")
 
 # Redis Config
 REDIS_URL = os.getenv("UPSTASH_REDIS_URL")
