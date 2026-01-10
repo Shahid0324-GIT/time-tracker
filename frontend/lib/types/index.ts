@@ -51,6 +51,26 @@ export interface ChangePasswordData {
   new_password: string;
 }
 
+export interface VerifyEmailData {
+  email: string;
+  otp: string;
+}
+
+export interface ForgotPasswordData {
+  email: string;
+}
+
+export interface ResetPasswordData {
+  token: string;
+  email: string;
+  new_password: string;
+}
+
+export interface RegisterResponse {
+  message: string;
+  email: string;
+}
+
 // ==========================================
 // CLIENTS
 // ==========================================
