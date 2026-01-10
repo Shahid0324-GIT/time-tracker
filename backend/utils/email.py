@@ -11,11 +11,14 @@ conf = ConnectionConfig(
     MAIL_FROM=MAIL_FROM,
     MAIL_PORT=MAIL_PORT,
     MAIL_SERVER=MAIL_SERVER,
+    MAIL_FROM_NAME="Freelance Flow",
+    
+    # ✅ Brevo Settings (Standard SMTP)
+    MAIL_STARTTLS=True,
+    MAIL_SSL_TLS=False,
+    
     USE_CREDENTIALS=True,
     VALIDATE_CERTS=True,
-    MAIL_FROM_NAME="Freelance Flow - Time Tracker",
-    MAIL_STARTTLS=False,
-    MAIL_SSL_TLS=True,   
     TIMEOUT=30
 )
 
