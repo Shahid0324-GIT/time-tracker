@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     description: "Professional time tracking and invoicing application",
     images: [
       {
-        url: "https://ogcdn.net/904e879f-a9bb-4c56-9362-06e6c8fe3ac6/v3/https%3A%2F%2Fopengraph.b-cdn.net%2Fproduction%2Fimages%2F29ce311e-29ea-423f-bd6b-549a0b579d48.png%3Ftoken%3DJKY6sp9HhymJ-gAoaExksAIMREyGsHiJdLoZGFNV0jc%26height%3D507%26width%3D1200%26expires%3D33303710124/https%3A%2F%2Fopengraph.b-cdn.net%2Fproduction%2Fimages%2Fad6c83cc-8726-461d-9cf0-398dc677cd74.png%3Ftoken%3DVn4R03VL_Lq4TH_6E9uBMOFrBLjwDDbZHulFjCmRhew%26height%3D350%26width%3D350%26expires%3D33303710252/og.png",
+        url: "https://ogcdn.net/904e879f-a9bb-4c56-9362-06e6c8fe3ac6/v5/https%3A%2F%2Fopengraph.b-cdn.net%2Fproduction%2Fimages%2Fe76f52ee-2b7d-40bd-9cd2-ec80432b5a2e.png%3Ftoken%3DQxvW8fQaSdGmLLuaROQ8HcmN6rZKd_hwCDL2BZKN9b0%26height%3D555%26width%3D1200%26expires%3D33304062235/og.png",
         width: 1200,
         height: 630,
         alt: "Freelance Flow- Professional time tracking and invoicing",
