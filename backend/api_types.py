@@ -57,6 +57,14 @@ class UserUpdate(BaseModel):
 class PasswordChange(BaseModel):
     old_password: str
     new_password: str
+    
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    email: str
+    new_password: str
 
 class Token(BaseModel):
     """Response body after successful authentication"""

@@ -1,11 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
+from fastapi_limiter import FastAPILimiter
 
 from db import create_db_and_tables
 from routers import auth_routes, users, oauth, clients, projects, time_entries, invoices
 from contextlib import asynccontextmanager
 from config import SECRET_KEY, FRONTEND_URL, IS_PRODUCTION
+from lib.redis_instance import get_redis
 
 # Load environment variables
 
@@ -19,15 +21,19 @@ async def lifespan(app: FastAPI):
     """
     Lifespan event handler - runs on startup and shutdown
     """
-    # Startup
     print("🚀 Starting Time Tracker API...")
     create_db_and_tables()
     print("✅ Database tables created/verified")
     
-    yield  # App is running
+    redis_client = await get_redis()
+    await FastAPILimiter.init(redis_client)
+    print("✅ Redis Rate Limiter initialized")
     
-    # Shutdown (if needed)
+    yield  
+    
+    # Shutdown
     print("👋 Shutting down Time Tracker API...")
+    await redis_client.close() 
 
 # FastAPI App instance
 app = FastAPI(

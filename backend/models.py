@@ -52,6 +52,9 @@ class User(SQLModel, table=True):
     tax_id: Optional[str] = None
     website: Optional[str] = None      
     
+    # Verification
+    is_verified: bool = Field(default=False)
+    
     # Timestamps
     created_at: datetime = Field(
         sa_column=Column(

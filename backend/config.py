@@ -25,7 +25,16 @@ COOKIE_SAMESITE = "none" if IS_PRODUCTION else "lax"
 # Frontend URL
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
-print(f"🔧 Config: IS_PRODUCTION={IS_PRODUCTION}, COOKIE_SECURE={COOKIE_SECURE}, COOKIE_SAMESITE={COOKIE_SAMESITE}")
+# Email Config
+MAIL_USERNAME = os.getenv("MAIL_USERNAME")
+MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+MAIL_FROM = os.getenv("MAIL_FROM", MAIL_USERNAME)
+MAIL_PORT = int(os.getenv("MAIL_PORT", 587))
+MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.gmail.com")
+
+# Redis Config
+REDIS_URL = os.getenv("UPSTASH_REDIS_URL")
+
 
 # ============================================
 # DATABASE CONFIGURATION
