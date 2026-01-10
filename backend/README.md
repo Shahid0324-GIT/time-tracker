@@ -1,4 +1,4 @@
-# Time Tracker - Backend API
+# Freelance Flow - Backend API
 
 > FastAPI backend for time tracking and invoicing
 
