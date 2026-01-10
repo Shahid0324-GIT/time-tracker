@@ -18,6 +18,7 @@ import {
 import { toast } from "sonner";
 import { authApi } from "@/lib/api/auth";
 import { AxiosError } from "axios";
+import { useAuthStore } from "@/lib/stores/authStore";
 
 const passwordSchema = z
   .object({
@@ -36,6 +37,7 @@ type PasswordValues = z.infer<typeof passwordSchema>;
 
 export function ChangePasswordForm() {
   const [isSaving, setIsSaving] = useState(false);
+  const { user } = useAuthStore();
 
   const form = useForm<PasswordValues>({
     resolver: zodResolver(passwordSchema),
@@ -47,6 +49,11 @@ export function ChangePasswordForm() {
   });
 
   async function onSubmit(data: PasswordValues) {
+    if (user?.email === "janedoe@example.com") {
+      toast.error("Demo account password cannot be changed.");
+      return;
+    }
+
     setIsSaving(true);
     try {
       await authApi.changePassword({
@@ -118,7 +125,11 @@ export function ChangePasswordForm() {
         </div>
 
         <div className="flex justify-end">
-          <Button type="submit" disabled={isSaving} variant="destructive">
+          <Button
+            type="submit"
+            disabled={isSaving || user?.email === "janedoe@example.com"}
+            variant="destructive"
+          >
             {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Change Password
           </Button>
