@@ -1,23 +1,38 @@
+import random
+import json
 from fastapi import APIRouter, Depends, HTTPException, status, Response
+from fastapi_limiter.depends import RateLimiter
 from sqlmodel import Session, select
 from datetime import datetime, timezone
+from uuid import uuid4
+
 
 from auth import verify_password, hash_password, get_current_user, create_access_token
 from models import User
-from api_types import UserCreate, UserLogin, UserResponse, Token, PasswordChange, TokenExchangeRequest
+from api_types import UserCreate, UserLogin, UserResponse, Token, PasswordChange, TokenExchangeRequest, ResetPasswordRequest, ForgotPasswordRequest
 from db import get_session
 from config import COOKIE_SECURE, COOKIE_SAMESITE, COOKIE_NAME, COOKIE_MAX_AGE
+from utils.email import send_otp_email, send_password_reset_email
+from redis.asyncio import Redis 
+from lib.redis_instance import get_redis 
 
 # router
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
-@router.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED)
-def register_user(
-    response: Response, 
+@router.post(
+    "/register", 
+    status_code=status.HTTP_200_OK, 
+    dependencies=[Depends(RateLimiter(times=3, seconds=60))] 
+)
+async def register_user(
     user_data: UserCreate, 
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    redis_client: Redis = Depends(get_redis)
 ):
-    """Registering a new user"""
+    """
+    Step 1: Validate email and send OTP. 
+    Does NOT create user in DB yet. Stores temp data in Redis.
+    """
     statement = select(User).where(User.email == user_data.email)
     existing_user = session.exec(statement=statement).first()
     
@@ -26,18 +41,61 @@ def register_user(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="User already exists with this email."
         )
+
+    otp = str(random.randint(100000, 999999))
+    
+    temp_user_key = f"signup:{user_data.email}"
+    
+    data_to_store = {
+        "user": user_data.model_dump_json(),
+        "otp": otp
+    }
+    
+    await redis_client.hset(temp_user_key, mapping=data_to_store) # type: ignore
+    await redis_client.expire(temp_user_key, 600)
+    
+    await send_otp_email(user_data.email, otp)
+    
+    return {"message": "Verification code sent to your email", "email": user_data.email}
+
+@router.post("/verify-email", response_model=Token)
+async def verify_email(
+    response: Response,
+    email: str, 
+    otp: str, 
+    session: Session = Depends(get_session),
+    redis_client: Redis = Depends(get_redis)
+):
+    """
+    Step 2: Verify OTP and create user in Postgres.
+    """
+    temp_user_key = f"signup:{email}"
+    
+    stored_data = await redis_client.hgetall(temp_user_key)
+    
+    if not stored_data:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="Verification code expired or invalid email. Please register again."
+        )
         
-    hashed_password = hash_password(user_data.password)
+    if stored_data["otp"] != otp:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid verification code")
+        
+    user_dict = json.loads(stored_data["user"])
+    
+    hashed_password = hash_password(user_dict["password"])
     
     new_user = User(
-        email=user_data.email,
-        first_name=user_data.first_name,
-        last_name=user_data.last_name,
+        email=user_dict["email"],
+        first_name=user_dict["first_name"],
+        last_name=user_dict["last_name"],
         hashed_password=hashed_password,
-        business_name=user_data.business_name,
-        business_address=user_data.business_address,
-        tax_id=user_data.tax_id,
-        website=user_data.website,
+        business_name=user_dict.get("business_name"),
+        business_address=user_dict.get("business_address"),
+        tax_id=user_dict.get("tax_id"),
+        website=user_dict.get("website"),
+        is_verified=True, 
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
@@ -46,9 +104,10 @@ def register_user(
     session.commit()
     session.refresh(new_user)
     
+    await redis_client.delete(temp_user_key)
+    
     token = create_access_token(data={"sub": str(new_user.id)})
     
-    # Set HttpOnly Cookie
     response.set_cookie(
         key=COOKIE_NAME,
         value=token,
@@ -59,10 +118,13 @@ def register_user(
         path="/" 
     )
     
-    # Return empty access_token string since it's now in the cookie
     return Token(access_token="", token_type="bearer", user=UserResponse.model_validate(new_user))
 
-@router.post("/login", response_model=Token)
+@router.post(
+    "/login", 
+    response_model=Token,
+    dependencies=[Depends(RateLimiter(times=5, seconds=60))] 
+)
 def login_user(
     response: Response,
     login_data: UserLogin, 
@@ -86,8 +148,6 @@ def login_user(
     
     token = create_access_token(data={"sub": str(user.id)})
     
-    # 🔍 DEBUG: Check logs in Render Dashboard to see these values
-    print(f"DEBUG COOKIE: Secure={COOKIE_SECURE}, SameSite={COOKIE_SAMESITE}")
     # Set HttpOnly Cookie
     response.set_cookie(
         key=COOKIE_NAME,
@@ -127,21 +187,18 @@ def change_password(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user)
 ):
-    # 1. Verify old password
     if not current_user.hashed_password or not verify_password(password_data.old_password, current_user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Incorrect old password"
         )
     
-    # 2. Check strict equality
     if password_data.old_password == password_data.new_password:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="New password cannot be the same as the old password"
         )
 
-    # 3. Hash new password and save
     current_user.hashed_password = hash_password(password_data.new_password)
     current_user.updated_at = datetime.now(timezone.utc)
     
@@ -159,9 +216,6 @@ def set_session_cookie(
     Exchange a raw token for a HttpOnly cookie.
     Used for OAuth flows where redirect cookies are blocked.
     """
-    # 🔍 DEBUG
-    print(f"EXCHANGE COOKIE: Secure={COOKIE_SECURE}, SameSite={COOKIE_SAMESITE}")
-
     response.set_cookie(
         key=COOKIE_NAME,
         value=request.access_token,
@@ -172,3 +226,67 @@ def set_session_cookie(
         samesite=COOKIE_SAMESITE, 
     )
     return {"status": "success"}
+
+@router.post(
+    "/forgot-password", 
+    dependencies=[Depends(RateLimiter(times=3, seconds=60))]
+)
+async def forgot_password(
+    request: ForgotPasswordRequest,
+    session: Session = Depends(get_session),
+    redis_client: Redis = Depends(get_redis)
+):
+    """
+    Initiates password reset flow.
+    """
+    statement = select(User).where(User.email == request.email)
+    user = session.exec(statement).first()
+    
+    if not user:
+        return {"message": "If an account exists, a reset link has been sent."}
+        
+    token = str(uuid4())
+    
+    redis_key = f"reset:{token}"
+    
+    await redis_client.set(redis_key, user.email, ex=900) 
+    
+    await send_password_reset_email(user.email, token)
+    
+    return {"message": "If an account exists, a reset link has been sent."}
+
+
+@router.post("/reset-password")
+async def reset_password(
+    request: ResetPasswordRequest,
+    session: Session = Depends(get_session),
+    redis_client: Redis = Depends(get_redis)
+):
+    """
+    Completes password reset using the token from email.
+    """
+    redis_key = f"reset:{request.token}"
+    
+    stored_email = await redis_client.get(redis_key)
+    
+    if not stored_email:
+        raise HTTPException(status_code=400, detail="Invalid or expired reset token")
+        
+    if stored_email != request.email:
+        raise HTTPException(status_code=400, detail="Invalid token for this email")
+        
+    statement = select(User).where(User.email == stored_email)
+    user = session.exec(statement).first()
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    user.hashed_password = hash_password(request.new_password)
+    user.updated_at = datetime.now(timezone.utc)
+    
+    session.add(user)
+    session.commit()
+    
+    await redis_client.delete(redis_key)
+    
+    return {"message": "Password reset successfully. You can now login."}
