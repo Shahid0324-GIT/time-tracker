@@ -1,4 +1,4 @@
-# ⏱️ Time Tracker
+# ⏱️ Freelance Flow Application
 
 > Professional time tracking and invoicing platform for freelancers and agencies
 
@@ -6,7 +6,7 @@
 [![Backend API](https://img.shields.io/badge/API-docs-blue)](https://your-railway-app.railway.app/docs)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-![Time Tracker Dashboard](./frontend/public/landing/dashboard_1.png)
+![Freelance Flow Dashboard](./frontend/public/landing/dashboard_1.png)
 
 ## 🎯 Features
 
@@ -21,8 +21,9 @@
 - 📈 **Analytics Dashboard** - Visual insights into time and revenue
 
 ## Auth Note:
+
 - This project currently uses cookie-based JWT storage managed on the client for simplicity.
-In a production setup, this would be migrated to HttpOnly Secure cookies set by the backend to mitigate XSS and CSRF risks.
+  In a production setup, this would be migrated to HttpOnly Secure cookies set by the backend to mitigate XSS and CSRF risks.
 
 ## 🛠️ Tech Stack
 
@@ -64,7 +65,7 @@ Password: janedoe123
 
 ![Dashboard](./frontend/public/landing/dashboard_1.png)
 
-### Time Tracker
+### Freelance Flow
 
 ![Timer](./frontend/public/landing/landing-main.png)
 
