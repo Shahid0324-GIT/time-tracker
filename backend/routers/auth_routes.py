@@ -1,4 +1,3 @@
-import random
 import json
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 from fastapi_limiter.depends import RateLimiter
@@ -6,17 +5,21 @@ from sqlmodel import Session, select
 from datetime import datetime, timezone
 from uuid import uuid4
 
-
+# Local imports
 from auth import verify_password, hash_password, get_current_user, create_access_token
 from models import User
-from api_types import UserCreate, UserLogin, UserResponse, Token, PasswordChange, TokenExchangeRequest, ResetPasswordRequest, ForgotPasswordRequest
+from api_types import (
+    UserCreate, UserLogin, UserResponse, Token, PasswordChange, 
+    TokenExchangeRequest, ResetPasswordRequest, ForgotPasswordRequest
+)
 from db import get_session
 from config import COOKIE_SECURE, COOKIE_SAMESITE, COOKIE_NAME, COOKIE_MAX_AGE
 from utils.email import send_otp_email, send_password_reset_email
+from utils.generate_otp import generate_r_otp
 from redis.asyncio import Redis 
 from lib.redis_instance import get_redis 
 
-# router
+# Router setup
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 @router.post(
@@ -42,13 +45,19 @@ async def register_user(
             detail="User already exists with this email."
         )
 
-    otp = str(random.randint(100000, 999999))
+    hashed_pass = hash_password(user_data.password)
+    
+    user_storage_dict = user_data.model_dump()
+    user_storage_dict["password"] = hashed_pass
+
+    otp = generate_r_otp()
+    hashed_otp = hash_password(otp)
     
     temp_user_key = f"signup:{user_data.email}"
     
     data_to_store = {
-        "user": user_data.model_dump_json(),
-        "otp": otp
+        "user": json.dumps(user_storage_dict), 
+        "otp": hashed_otp
     }
     
     await redis_client.hset(temp_user_key, mapping=data_to_store) # type: ignore
@@ -57,6 +66,7 @@ async def register_user(
     await send_otp_email(user_data.email, otp)
     
     return {"message": "Verification code sent to your email", "email": user_data.email}
+
 
 @router.post("/verify-email", response_model=Token)
 async def verify_email(
@@ -79,18 +89,18 @@ async def verify_email(
             detail="Verification code expired or invalid email. Please register again."
         )
         
-    if stored_data["otp"] != otp:
+    is_valid_otp = verify_password(otp, stored_data["otp"])
+        
+    if not is_valid_otp:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid verification code")
         
     user_dict = json.loads(stored_data["user"])
-    
-    hashed_password = hash_password(user_dict["password"])
     
     new_user = User(
         email=user_dict["email"],
         first_name=user_dict["first_name"],
         last_name=user_dict["last_name"],
-        hashed_password=hashed_password,
+        hashed_password=user_dict["password"], 
         business_name=user_dict.get("business_name"),
         business_address=user_dict.get("business_address"),
         tax_id=user_dict.get("tax_id"),
@@ -119,6 +129,7 @@ async def verify_email(
     )
     
     return Token(access_token="", token_type="bearer", user=UserResponse.model_validate(new_user))
+
 
 @router.post(
     "/login", 
@@ -165,6 +176,7 @@ def login_user(
         user=UserResponse.model_validate(user)
     )
 
+
 @router.post("/logout")
 def logout_user(response: Response):
     """Logout user by deleting the cookie"""
@@ -176,10 +188,12 @@ def logout_user(response: Response):
     )
     return {"message": "Logged out successfully"}
 
+
 @router.get("/me", response_model=UserResponse)
 def get_me(current_user: User = Depends(get_current_user)):
     """Get current authenticated user's information"""
     return UserResponse.model_validate(current_user)
+
 
 @router.post("/change-password", status_code=status.HTTP_200_OK)
 def change_password(
@@ -207,6 +221,7 @@ def change_password(
     
     return {"message": "Password updated successfully"}
 
+
 @router.post("/session")
 def set_session_cookie(
     response: Response,
@@ -227,6 +242,7 @@ def set_session_cookie(
     )
     return {"status": "success"}
 
+
 @router.post(
     "/forgot-password", 
     dependencies=[Depends(RateLimiter(times=3, seconds=60))]
@@ -243,6 +259,7 @@ async def forgot_password(
     user = session.exec(statement).first()
     
     if not user:
+        # Return success even if email doesn't exist (Security: user enumeration prevention)
         return {"message": "If an account exists, a reset link has been sent."}
         
     token = str(uuid4())
