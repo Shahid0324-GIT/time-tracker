@@ -20,7 +20,6 @@ import { Route } from "next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useRequireGuest } from "@/lib/hooks/useRequireAuth";
 
 const loginSchema = z.object({
   email: z.email("Invalid email address"),
@@ -30,8 +29,6 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  useRequireGuest();
-
   const { login, isLoggingIn } = useAuth();
 
   const {

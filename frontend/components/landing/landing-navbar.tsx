@@ -11,17 +11,17 @@ import {
 } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { LayoutDashboard, User } from "lucide-react";
-import { useCheckAuth } from "@/lib/hooks/useRequireAuth";
 import Image from "next/image";
 import { navLinks } from "@/lib/utils/constants";
 import { ThemeToggle } from "../ui/theme-toggle";
 import { useIsMobile } from "@/lib/hooks/use-mobile";
+import { useAuthStore } from "@/lib/stores/authStore";
 
 export function LandingNavbar() {
   const { scrollY } = useScroll();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { isAuthenticated, isLoading } = useCheckAuth();
+  const { isAuthenticated, isLoading } = useAuthStore();
   const isMobile = useIsMobile();
 
   useMotionValueEvent(scrollY, "change", (latest) => {

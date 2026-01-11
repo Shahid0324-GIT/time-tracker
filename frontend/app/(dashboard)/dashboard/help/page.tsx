@@ -1,8 +1,8 @@
 "use client";
 
-import { useRequireAuth } from "@/lib/hooks/useRequireAuth";
+// import { useRequireAuth } from "@/lib/hooks/useRequireAuth";
 
 export default function Help() {
-  useRequireAuth();
+  // useRequireAuth();
   return <h1>Help</h1>;
 }
