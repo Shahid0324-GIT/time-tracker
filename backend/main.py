@@ -8,19 +8,14 @@ from routers import auth_routes, users, oauth, clients, projects, time_entries, 
 from contextlib import asynccontextmanager
 from config import SECRET_KEY, FRONTEND_URL, IS_PRODUCTION
 from lib.redis_instance import get_redis
-
-# Load environment variables
-
-
+from middleware import CSRFProtectionMiddleware  
 
 if not SECRET_KEY:
     raise ValueError("SECRET_KEY environment variable is required")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """
-    Lifespan event handler - runs on startup and shutdown
-    """
+    """Lifespan event handler - runs on startup and shutdown"""
     print("🚀 Starting Time Tracker API...")
     create_db_and_tables()
     print("✅ Database tables created/verified")
@@ -31,11 +26,9 @@ async def lifespan(app: FastAPI):
     
     yield  
     
-    # Shutdown
     print("👋 Shutting down Time Tracker API...")
     await redis_client.close() 
 
-# FastAPI App instance
 app = FastAPI(
     title="Time Tracker API",
     description="Time tracking and invoice generation API",
@@ -43,28 +36,30 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# ============================================
+# MIDDLEWARE (Order matters!)
+# ============================================
 
-# ============================================
-# SESSION MIDDLEWARE (Must be added FIRST for OAuth)
-# ============================================
+# 1. Session Middleware (Must be first for OAuth)
 app.add_middleware(
     SessionMiddleware,
     secret_key=SECRET_KEY,
     session_cookie="session",
-    max_age=3600,  # 1 hour
+    max_age=3600,
     same_site='none' if IS_PRODUCTION else 'lax',
     https_only=True if IS_PRODUCTION else False,
 )
 
-# ============================================
-# CORS MIDDLEWARE
-# ============================================
+# 2. CSRF Protection
+app.add_middleware(CSRFProtectionMiddleware)
+
+# 3. CORS Middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         FRONTEND_URL,
         "http://localhost:3000",
-        "http://localhost:5173",  # Vite default
+        "http://localhost:5173",
         "https://time-tracker-five-lilac.vercel.app"
     ],
     allow_credentials=True,
@@ -74,9 +69,8 @@ app.add_middleware(
 )
 
 # ============================================
-# INCLUDE ROUTERS
+# ROUTERS
 # ============================================
-
 app.include_router(auth_routes.router)
 app.include_router(users.router)
 app.include_router(oauth.router)
@@ -97,7 +91,6 @@ def root():
         "status": "running",
         "docs": "/docs"
     }
-
 
 @app.get("/health")
 def health_check():
