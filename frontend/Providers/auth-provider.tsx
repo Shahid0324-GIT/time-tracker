@@ -9,7 +9,7 @@ import {
   GUEST_ONLY_ROUTES,
   PUBLIC_SHARED_ROUTES,
 } from "@/lib/config/navigation";
-import { Loader2Icon } from "lucide-react";
+import FreelanceLoader from "@/components/ui/loader";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { login, logout, setLoading, isLoading } = useAuthStore();
@@ -53,7 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   if (isLoading) {
     return (
       <div className="size-full min-h-screen flex justify-center items-center">
-        <Loader2Icon className="animate-spin h-8 w-8" />
+        <FreelanceLoader />
       </div>
     );
   }
