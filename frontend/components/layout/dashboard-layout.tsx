@@ -3,8 +3,8 @@
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { DashboardHeader } from "@/components/dashboard/header/dashboard-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { Loader2Icon } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/authStore";
+import FreelanceLoader from "../ui/loader";
 
 export default function DashboardClient({
   children,
@@ -16,7 +16,7 @@ export default function DashboardClient({
   if (isLoading || !isAuthenticated) {
     return (
       <div className="size-full min-h-screen flex justify-center items-center bg-background">
-        <Loader2Icon className="animate-spin h-8 w-8" />
+        <FreelanceLoader />
       </div>
     );
   }
