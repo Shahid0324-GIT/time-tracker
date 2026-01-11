@@ -110,3 +110,8 @@ export const navLinks = [
   { name: "Features", href: "#features" },
   { name: "Details", href: "#details" },
 ];
+
+export const DEMO_CREDENTIALS = {
+  email: "janedoe@example.com",
+  password: "janedoe123",
+};
