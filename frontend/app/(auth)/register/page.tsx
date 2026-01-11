@@ -21,7 +21,6 @@ import { Route } from "next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useRequireGuest } from "@/lib/hooks/useRequireAuth";
 
 const registerSchema = z
   .object({
@@ -44,7 +43,6 @@ const registerSchema = z
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
-  useRequireGuest();
   const { register: registerUser, isRegistering } = useAuth();
 
   const {

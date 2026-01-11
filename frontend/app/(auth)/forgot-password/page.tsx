@@ -24,7 +24,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useRequireGuest } from "@/lib/hooks/useRequireAuth";
 import { Route } from "next";
 
 const formSchema = z.object({
@@ -32,8 +31,6 @@ const formSchema = z.object({
 });
 
 export default function ForgotPasswordPage() {
-  useRequireGuest();
-  // ✅ Destructure isSendingReset from useAuth
   const { forgotPassword, isSendingReset } = useAuth();
 
   const form = useForm<z.infer<typeof formSchema>>({

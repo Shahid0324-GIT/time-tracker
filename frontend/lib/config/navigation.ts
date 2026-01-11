@@ -64,3 +64,15 @@ export const SECONDARY_NAV_ITEMS = [
   //   icon: HelpCircle,
   // },
 ];
+
+export const GUEST_ONLY_ROUTES = [
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/reset-password",
+  "/verify-email",
+  "/complete-profile",
+];
+
+export const PUBLIC_SHARED_ROUTES = ["/"];
+export const AUTH_CALLBACK_ROUTES = ["/auth/callback"];

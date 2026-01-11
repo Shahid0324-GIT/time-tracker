@@ -3,20 +3,20 @@
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { DashboardHeader } from "@/components/dashboard/header/dashboard-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { useRequireAuth } from "@/lib/hooks/useRequireAuth";
 import { Loader2Icon } from "lucide-react";
+import { useAuthStore } from "@/lib/stores/authStore";
 
 export default function DashboardClient({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { isLoading } = useRequireAuth();
+  const { isLoading, isAuthenticated } = useAuthStore();
 
-  if (isLoading) {
+  if (isLoading || !isAuthenticated) {
     return (
-      <div className="size-full min-h-screen flex justify-center items-center">
-        <Loader2Icon className="animate-spin" />
+      <div className="size-full min-h-screen flex justify-center items-center bg-background">
+        <Loader2Icon className="animate-spin h-8 w-8" />
       </div>
     );
   }
