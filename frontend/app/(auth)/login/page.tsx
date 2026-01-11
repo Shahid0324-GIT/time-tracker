@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Card,
   CardContent,
@@ -14,12 +16,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Github } from "lucide-react";
+import { Loader2, Github, FlaskConical } from "lucide-react";
 import { authApi } from "@/lib/api/auth";
 import { Route } from "next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { DEMO_CREDENTIALS } from "@/lib/utils/constants";
 
 const loginSchema = z.object({
   email: z.email("Invalid email address"),
@@ -30,18 +33,32 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const { login, isLoggingIn } = useAuth();
+  const [isDemoMode, setIsDemoMode] = useState(false);
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "janedoe@example.com",
-      password: "janedoe123",
+      email: "",
+      password: "",
     },
   });
+
+  const handleDemoToggle = (checked: boolean) => {
+    setIsDemoMode(checked);
+
+    if (checked) {
+      setValue("email", DEMO_CREDENTIALS.email);
+      setValue("password", DEMO_CREDENTIALS.password);
+    } else {
+      setValue("email", "");
+      setValue("password", "");
+    }
+  };
 
   const onSubmit = (data: LoginFormValues) => {
     login({ email: data.email, password: data.password });
@@ -67,6 +84,27 @@ export default function LoginPage() {
       </CardHeader>
 
       <CardContent className="space-y-4">
+        <div className="flex items-center justify-between rounded-lg border p-3 shadow-sm bg-background/50">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+              <FlaskConical className="h-4 w-4 text-primary" />
+            </div>
+            <div className="flex flex-col space-y-0.5">
+              <Label htmlFor="demo-mode" className="text-sm font-medium">
+                Test Drive
+              </Label>
+              <span className="text-xs text-muted-foreground">
+                Use demo account
+              </span>
+            </div>
+          </div>
+          <Switch
+            id="demo-mode"
+            checked={isDemoMode}
+            onCheckedChange={handleDemoToggle}
+          />
+        </div>
+
         {/* Email/Password Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
@@ -75,7 +113,8 @@ export default function LoginPage() {
               id="email"
               type="email"
               placeholder="you@example.com"
-              disabled={isLoggingIn}
+              disabled={isLoggingIn || isDemoMode}
+              className={isDemoMode ? "bg-muted text-muted-foreground" : ""}
               {...register("email")}
             />
             {errors.email && (
@@ -88,19 +127,21 @@ export default function LoginPage() {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="password">Password</Label>
-              {/* ✅ ADDED: Forgot Password Link */}
-              <Link
-                href={"/forgot-password" as Route}
-                className="text-sm font-medium text-muted-foreground hover:text-primary hover:underline transition-colors"
-              >
-                Forgot password?
-              </Link>
+              {!isDemoMode && (
+                <Link
+                  href={"/forgot-password" as Route}
+                  className="text-sm font-medium text-muted-foreground hover:text-primary hover:underline transition-colors"
+                >
+                  Forgot password?
+                </Link>
+              )}
             </div>
             <Input
               id="password"
               type="password"
               placeholder="••••••••"
-              disabled={isLoggingIn}
+              disabled={isLoggingIn || isDemoMode}
+              className={isDemoMode ? "bg-muted text-muted-foreground" : ""}
               {...register("password")}
             />
             {errors.password && (
@@ -116,6 +157,8 @@ export default function LoginPage() {
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Signing in...
               </>
+            ) : isDemoMode ? (
+              "Sign in with Demo Account"
             ) : (
               "Sign in"
             )}
@@ -142,6 +185,7 @@ export default function LoginPage() {
             onClick={handleGoogleLogin}
             disabled={isLoggingIn}
           >
+            {/* ... Google SVG ... */}
             <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
               <path
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
