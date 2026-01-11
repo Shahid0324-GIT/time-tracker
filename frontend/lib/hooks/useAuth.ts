@@ -86,7 +86,7 @@ export function useAuth() {
     queryClient.cancelQueries();
     clearAuth();
     queryClient.clear();
-    router.push("/login" as Route);
+    router.replace("/login" as Route);
     toast.success("Logged out successfully");
     try {
       await authApi.logout();

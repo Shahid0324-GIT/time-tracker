@@ -19,7 +19,7 @@ export const NAV_ITEMS = [
         icon: LayoutGrid,
       },
       {
-        title: "Freelance Flow",
+        title: "Time Tracker",
         url: "/dashboard/tracker",
         icon: Clock,
       },
