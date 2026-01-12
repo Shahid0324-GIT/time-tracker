@@ -70,12 +70,12 @@ export function HeroSection() {
         </div>
 
         {/* BROTHER'S CAPTION */}
-        <div className="flex flex-row space-x-10 justify-between">
+        <div className="flex flex-row space-x-2 sm:space-x-10 justify-between items-center">
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.6 }}
-            className="text-lg md:text-xl uppercase tracking-[0.2em] font-bold text-cyan-700 dark:text-cyan-400 drop-shadow-[0_0_30px_rgba(34,211,238,0.3) mt-6 mb-2"
+            className="text-sm sm:text-lg md:text-xl uppercase tracking-widest sm:tracking-[0.2em] font-bold text-cyan-700 dark:text-cyan-400 drop-shadow-[0_0_30px_rgba(34,211,238,0.3)] mt-6 mb-2"
           >
             Action
           </motion.p>
@@ -83,7 +83,7 @@ export function HeroSection() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.6 }}
-            className="text-lg md:text-xl uppercase tracking-[0.2em] font-bold  text-purple-700 dark:text-purple-500 drop-shadow-[0_0_30px_rgba(168,85,247,0.3) mt-6 mb-2"
+            className="text-sm sm:text-lg md:text-xl uppercase tracking-widest sm:tracking-[0.2em] font-bold text-purple-700 dark:text-purple-500 drop-shadow-[0_0_30px_rgba(168,85,247,0.3)] mt-6 mb-2"
           >
             -
           </motion.p>
@@ -91,7 +91,7 @@ export function HeroSection() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.6 }}
-            className="text-lg md:text-xl uppercase tracking-[0.2em] font-bold  text-purple-700 dark:text-purple-500 drop-shadow-[0_0_30px_rgba(168,85,247,0.3) mt-6 mb-2"
+            className="text-sm sm:text-lg md:text-xl uppercase tracking-widest sm:tracking-[0.2em] font-bold text-purple-700 dark:text-purple-500 drop-shadow-[0_0_30px_rgba(168,85,247,0.3)] mt-6 mb-2"
           >
             Relieves
           </motion.p>
@@ -99,7 +99,7 @@ export function HeroSection() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.6 }}
-            className="text-lg md:text-xl uppercase tracking-[0.2em] font-bold text-cyan-700 dark:text-cyan-400 drop-shadow-[0_0_30px_rgba(34,211,238,0.3) mt-6 mb-2"
+            className="text-sm sm:text-lg md:text-xl uppercase tracking-widest sm:tracking-[0.2em] font-bold text-cyan-700 dark:text-cyan-400 drop-shadow-[0_0_30px_rgba(34,211,238,0.3)] mt-6 mb-2"
           >
             -
           </motion.p>
@@ -107,7 +107,7 @@ export function HeroSection() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.6 }}
-            className="text-lg md:text-xl uppercase tracking-[0.2em] font-bold text-cyan-700 dark:text-cyan-400 drop-shadow-[0_0_30px_rgba(34,211,238,0.3) mt-6 mb-2"
+            className="text-sm sm:text-lg md:text-xl uppercase tracking-widest sm:tracking-[0.2em] font-bold text-cyan-700 dark:text-cyan-400 drop-shadow-[0_0_30px_rgba(34,211,238,0.3)] mt-6 mb-2"
           >
             Anxiety
           </motion.p>

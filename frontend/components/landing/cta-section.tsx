@@ -29,7 +29,7 @@ export function CTASection() {
       ref={containerRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className="relative min-h-[60vh] flex flex-col items-center justify-center overflow-hidden py-20"
+      className="relative w-full flex flex-col items-center justify-center overflow-hidden py-20"
     >
       {/* Background radial gradient that moves with mouse - light mode */}
       <div

@@ -68,12 +68,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased transition-colors`}
       >
         <Toaster />
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange={false}
-        >
+        <ThemeProvider attribute="class" defaultTheme="dark">
           <AuthProvider>
             <Providers>{children}</Providers>
           </AuthProvider>

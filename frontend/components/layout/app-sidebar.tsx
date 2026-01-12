@@ -18,6 +18,7 @@ import {
   SidebarGroupContent,
   SidebarSeparator,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import {
   DropdownMenu,
@@ -36,10 +37,13 @@ import { Route } from "next";
 import { SidebarSkeleton } from "./app-sidebar-skeleton";
 import Image from "next/image";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { useIsMobile } from "@/lib/hooks/use-mobile";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const { logout } = useAuth();
+  const { toggleSidebar } = useSidebar();
+  const isMobile = useIsMobile();
 
   const user = useAuthStore((state) => state.user);
 
@@ -77,7 +81,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
 
       {/* --- Content: Navigation --- */}
-      <SidebarContent>
+      <SidebarContent
+        onClick={(e) => {
+          if (isMobile) {
+            e.stopPropagation();
+            toggleSidebar();
+          }
+        }}
+      >
         {NAV_ITEMS.map((group) => (
           <SidebarGroup key={group.title}>
             <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
