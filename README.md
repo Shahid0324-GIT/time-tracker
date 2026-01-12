@@ -20,11 +20,6 @@
 - 📱 **Responsive Design** - Works perfectly on mobile, tablet, and desktop
 - 📈 **Analytics Dashboard** - Visual insights into time and revenue
 
-## Auth Note:
-
-- This project currently uses cookie-based JWT storage managed on the client for simplicity.
-  In a production setup, this would be migrated to HttpOnly Secure cookies set by the backend to mitigate XSS and CSRF risks.
-
 ## 🛠️ Tech Stack
 
 ### Backend
