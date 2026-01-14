@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -41,10 +41,18 @@ import { useClients } from "@/lib/hooks/use-clients";
 import { useTimeEntries } from "@/lib/hooks/use-time-entries";
 import { useInvoices } from "@/lib/hooks/use-invoices";
 import { formatCurrency, formatDurationTime } from "@/lib/utils/format";
-import { TAX_RATES, PAYMENT_TERMS } from "@/lib/utils/constants";
 import { InvoiceFormValues, invoiceSchema } from "@/lib/schemas";
+import { PAYMENT_TERMS, TAX_RATES } from "@/lib/utils/constants";
 
-// --- STEPS DEFINITION ---
+// --- HELPER FUNCTION ---
+const getDaysFromTerms = (terms: string): number => {
+  if (terms === "Due on Receipt") return 0;
+  // Regex to extract the number from "Net 7", "Net 30", etc.
+  const match = terms.match(/Net (\d+)/);
+  return match ? parseInt(match[1], 10) : 0;
+};
+
+// --- TYPES ---
 type Step = "select-client" | "select-time" | "configure";
 
 interface InvoiceGeneratorProps {
@@ -54,7 +62,6 @@ interface InvoiceGeneratorProps {
 export function InvoiceGenerator({ onSuccess }: InvoiceGeneratorProps) {
   const [step, setStep] = useState<Step>("select-client");
 
-  // Hooks
   const { clients } = useClients();
   const { createInvoice, isCreating } = useInvoices();
 
@@ -65,14 +72,13 @@ export function InvoiceGenerator({ onSuccess }: InvoiceGeneratorProps) {
       limit: 500,
     });
 
-  // --- FORM SETUP ---
   const form = useForm<InvoiceFormValues>({
     resolver: zodResolver(invoiceSchema),
     defaultValues: {
       client_id: "",
       time_entry_ids: [],
       issue_date: new Date(),
-      due_date: addDays(new Date(), 14),
+      due_date: addDays(new Date(), 15),
       tax_rate: "0.00",
       payment_terms: "Net 15",
       notes: "",
@@ -92,9 +98,26 @@ export function InvoiceGenerator({ onSuccess }: InvoiceGeneratorProps) {
     name: "tax_rate",
   });
 
-  // --- DERIVED DATA ---
+  const paymentTerms = useWatch({
+    control: form.control,
+    name: "payment_terms",
+  });
+  const issueDate = useWatch({
+    control: form.control,
+    name: "issue_date",
+  });
 
-  // 1. Filter entries for selected client
+  const { setValue } = form;
+
+  useEffect(() => {
+    if (issueDate && paymentTerms) {
+      const daysToAdd = getDaysFromTerms(paymentTerms);
+      const newDueDate = addDays(issueDate, daysToAdd);
+
+      setValue("due_date", newDueDate);
+    }
+  }, [paymentTerms, issueDate, setValue]);
+
   const clientEntries = useMemo(() => {
     if (!selectedClientId || !allUnbilledEntries) return [];
     return allUnbilledEntries.filter(
@@ -102,7 +125,6 @@ export function InvoiceGenerator({ onSuccess }: InvoiceGeneratorProps) {
     );
   }, [selectedClientId, allUnbilledEntries]);
 
-  // 2. Calculate Totals for Preview
   const totals = useMemo(() => {
     const selectedEntries = clientEntries.filter((e) =>
       selectedEntryIds.includes(e.id)
@@ -110,7 +132,6 @@ export function InvoiceGenerator({ onSuccess }: InvoiceGeneratorProps) {
 
     let subtotal = 0;
     selectedEntries.forEach((e) => {
-      // Calculate cost: (seconds / 3600) * hourly_rate
       const hours = (e.duration_seconds || 0) / 3600;
       const rate = Number(e.project?.hourly_rate || 0);
       subtotal += hours * rate;
@@ -121,8 +142,6 @@ export function InvoiceGenerator({ onSuccess }: InvoiceGeneratorProps) {
 
     return { subtotal, tax, total, count: selectedEntries.length };
   }, [clientEntries, selectedEntryIds, taxRate]);
-
-  // --- HANDLERS ---
 
   const handleClientSelect = (clientId: string) => {
     form.setValue("client_id", clientId);
@@ -144,7 +163,6 @@ export function InvoiceGenerator({ onSuccess }: InvoiceGeneratorProps) {
   const onSubmit = async (data: InvoiceFormValues) => {
     await createInvoice({
       ...data,
-      // Convert dates to YYYY-MM-DD strings for backend
       issue_date: format(data.issue_date, "yyyy-MM-dd"),
       due_date: format(data.due_date, "yyyy-MM-dd"),
     });
