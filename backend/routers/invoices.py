@@ -217,6 +217,8 @@ def generate_invoice(
     return load_invoice_with_details(session, invoice.id)
 
 
+from datetime import date # Make sure this is imported
+
 # ============================================
 # LIST INVOICES
 # ============================================
@@ -231,14 +233,31 @@ def get_invoices(
     offset: int = 0
 ):
     """
-    Get all invoices for current user
+    Get all invoices for current user.
     
-    Query params:
-    - client_id: Filter by client
-    - status: Filter by status
-    - limit: Max results
-    - offset: Pagination offset
+    AUTOMATICALLY UPDATES: 
+    Checks for 'SENT' invoices past their due date and marks them 'OVERDUE'
+    before returning the list.
     """
+    
+    today = date.today()
+    
+    overdue_check_stmt = select(Invoice).where(
+        Invoice.user_id == current_user.id,
+        Invoice.status == InvoiceStatus.SENT,  
+        Invoice.due_date < today,              
+        Invoice.is_active == True
+    )
+    
+    overdue_invoices = session.exec(overdue_check_stmt).all()
+    
+    if overdue_invoices:
+        for invoice in overdue_invoices:
+            invoice.status = InvoiceStatus.OVERDUE
+            session.add(invoice)
+        
+        session.commit()
+
     
     # Base query
     statement = select(Invoice).where(
