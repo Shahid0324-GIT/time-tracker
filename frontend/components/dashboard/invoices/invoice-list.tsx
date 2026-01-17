@@ -54,6 +54,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { toast } from "sonner";
 
 interface InvoiceListProps {
   searchQuery?: string;
@@ -126,7 +127,8 @@ export function InvoiceList({
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (e) {
-      console.error("Download failed", e);
+      const msg = e instanceof Error ? e.message : "Download failed";
+      toast.error(msg);
     } finally {
       setDownloadingId(null);
     }

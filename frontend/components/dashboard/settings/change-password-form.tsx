@@ -63,7 +63,6 @@ export function ChangePasswordForm() {
       toast.success("Password changed successfully");
       form.reset(); // Clear the form on success
     } catch (error: unknown) {
-      console.error(error);
       const msg =
         error instanceof AxiosError
           ? error.response?.data?.detail || "Failed to change password"

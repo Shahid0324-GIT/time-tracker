@@ -45,8 +45,9 @@ function AuthCallbackContent() {
           router.push("/dashboard" as Route);
         }
       } catch (err) {
-        console.error("Login failed", err);
-        toast.error("Failed to finalize session.");
+        const msg =
+          err instanceof Error ? err.message : "Failed to finalize session.";
+        toast.error(msg);
         router.push("/login" as Route);
       }
     };

@@ -64,8 +64,11 @@ export default function CompleteProfilePage() {
       toast.success("Profile setup complete!");
       router.push("/dashboard" as Route);
     } catch (error) {
-      console.error(error);
-      toast.error("Failed to save details. You can try again in Settings.");
+      const msg =
+        error instanceof Error
+          ? error.message
+          : "Failed to save details. You can try again in Settings.";
+      toast.error(msg);
       router.push("/dashboard" as Route);
     } finally {
       setIsSaving(false);

@@ -16,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { toast } from "sonner";
 
 interface InvoiceViewProps {
   invoiceId: string;
@@ -51,7 +52,8 @@ export function InvoiceView({ invoiceId }: InvoiceViewProps) {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (e) {
-      console.error(e);
+      const msg = e instanceof Error ? e.message : "Download failed";
+      toast.error(msg);
     }
   };
 

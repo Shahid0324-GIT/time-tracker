@@ -30,7 +30,7 @@ export const timeApi = {
     // Returns 204 or null if no timer, so handle that
     try {
       const { data } = await api.get<TimerResponse>(
-        "/time-entries/timer/running"
+        "/time-entries/timer/running",
       );
       return data;
     } catch (error) {
@@ -42,7 +42,7 @@ export const timeApi = {
   startTimer: async (payload: TimerStartRequest) => {
     const { data } = await api.post<TimerResponse>(
       "/time-entries/timer/start",
-      payload
+      payload,
     );
     return data;
   },
@@ -71,7 +71,7 @@ export const timeApi = {
   update: async ({ id, payload }: { id: string; payload: TimeEntryCreate }) => {
     const { data } = await api.patch<TimeEntryWithProject>(
       `/time-entries/${id}`,
-      payload
+      payload,
     );
     return data;
   },
