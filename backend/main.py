@@ -58,9 +58,6 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         FRONTEND_URL,
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "https://time-tracker-five-lilac.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -92,7 +89,7 @@ def root():
         "docs": "/docs"
     }
 
-@app.get("/health")
+@app.api_route("/health", methods=["GET", "HEAD"])
 def health_check():
     """Health check endpoint"""
     return {"status": "healthy"}
