@@ -15,11 +15,6 @@ from auth import get_current_user
 
 router = APIRouter(prefix="/time-entries", tags=["Time Entries"])
 
-
-# ============================================
-# HELPER: Calculate Duration
-# ============================================
-
 # ============================================
 # HELPER: Calculate Duration
 # ============================================
